@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Lambda Tuner v2.0.0 - Report Preview</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .preview-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.2em;
+        }
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        .report-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .report-card:hover {
+            transform: translateY(-5px);
+        }
+        .report-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        .report-preview {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, #f8f9fa 25%, transparent 25%), 
+                        linear-gradient(-45deg, #f8f9fa 25%, transparent 25%), 
+                        linear-gradient(45deg, transparent 75%, #f8f9fa 75%), 
+                        linear-gradient(-45deg, transparent 75%, #f8f9fa 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        .preview-content {
+            text-align: center;
+            z-index: 2;
+        }
+        .preview-icon {
+            font-size: 3em;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+        .features-list {
+            list-style: none;
+            padding: 0;
+        }
+        .features-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            color: #555;
+        }
+        .features-list li:last-child {
+            border-bottom: none;
+        }
+        .features-list li:before {
+            content: "✓";
+            color: #27ae60;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .link-button {
+            display: inline-block;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.3s ease;
+        }
+        .link-button:hover {
+            transform: translateY(-2px);
+        }
+        .metrics-showcase {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .metric-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            display: block;
+        }
+        .metric-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="preview-container">
+        <div class="header">
+            <h1>🚀 AWS Lambda Tuner v2.0.0</h1>
+            <p>Professional Performance Reports & Interactive Dashboards</p>
+        </div>
+        
+        <div class="reports-grid">
+            <div class="report-card">
+                <h3>📊 Web API Performance Report</h3>
+                <div class="report-preview">
+                    <div class="preview-content">
+                        <div class="preview-icon">📈</div>
+                        <strong>Interactive HTML Report</strong>
+                    </div>
+                </div>
+                <ul class="features-list">
+                    <li>72.2% Performance Improvement</li>
+                    <li>28.7% Cost Savings Analysis</li>
+                    <li>Cold Start Optimization</li>
+                    <li>P95/P99 Latency Metrics</li>
+                    <li>Interactive Plotly.js Charts</li>
+                </ul>
+                <a href="sample_web_api_report.html" class="link-button">View Full Report</a>
+            </div>
+            
+            <div class="report-card">
+                <h3>💰 Cost Projection Dashboard</h3>
+                <div class="report-preview">
+                    <div class="preview-content">
+                        <div class="preview-icon">💹</div>
+                        <strong>Financial Analysis</strong>
+                    </div>
+                </div>
+                <ul class="features-list">
+                    <li>Multi-scenario Projections</li>
+                    <li>5-year Cost Forecasting</li>
+                    <li>ROI Calculations</li>
+                    <li>Traffic Pattern Analysis</li>
+                    <li>Annual Savings Estimates</li>
+                </ul>
+                <a href="sample_cost_projection.html" class="link-button">View Cost Analysis</a>
+            </div>
+            
+            <div class="report-card">
+                <h3>🎯 Interactive Dashboard</h3>
+                <div class="report-preview">
+                    <div class="preview-content">
+                        <div class="preview-icon">🖥️</div>
+                        <strong>Real-time Monitoring</strong>
+                    </div>
+                </div>
+                <ul class="features-list">
+                    <li>Live Performance Metrics</li>
+                    <li>Intelligent Insights</li>
+                    <li>Scenario Modeling</li>
+                    <li>Executive-ready Design</li>
+                    <li>Export Capabilities</li>
+                </ul>
+                <a href="sample_dashboard.html" class="link-button">View Dashboard</a>
+            </div>
+            
+            <div class="report-card">
+                <h3>📋 Structured Data (JSON)</h3>
+                <div class="report-preview">
+                    <div class="preview-content">
+                        <div class="preview-icon">🗂️</div>
+                        <strong>Raw Optimization Data</strong>
+                    </div>
+                </div>
+                <ul class="features-list">
+                    <li>Complete Session Data</li>
+                    <li>60 Test Executions</li>
+                    <li>6 Memory Configurations</li>
+                    <li>Performance Analytics</li>
+                    <li>API Integration Ready</li>
+                </ul>
+                <a href="sample_web_api_report.json" class="link-button">View JSON Data</a>
+            </div>
+        </div>
+        
+        <div class="metrics-showcase">
+            <h2 style="text-align: center; margin-bottom: 10px;">🏆 Proven Optimization Results</h2>
+            <p style="text-align: center; opacity: 0.9;">Real-world performance improvements across different workload types</p>
+            
+            <div class="metrics-grid">
+                <div class="metric-item">
+                    <span class="metric-value">72%</span>
+                    <div class="metric-label">Performance Improvement</div>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-value">65%</span>
+                    <div class="metric-label">Cold Start Reduction</div>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-value">35%</span>
+                    <div class="metric-label">Cost Savings</div>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-value">90%</span>
+                    <div class="metric-label">Test Coverage</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1029 @@
+{
+  "metadata": {
+    "function_arn": "arn:aws:lambda:us-east-1:123456789012:function:web-api-handler",
+    "function_name": "web-api-handler",
+    "timestamp": "2024-01-15T14:30:00.000Z",
+    "strategy": "balanced",
+    "iterations": 10,
+    "memory_sizes_tested": [256, 512, 1024, 1536, 2048, 3008],
+    "test_duration_seconds": 2400,
+    "workload_type": "web_api",
+    "runtime": "python3.9",
+    "region": "us-east-1",
+    "report_type": "comprehensive_analysis",
+    "tool_version": "2.1.0"
+  },
+  "executive_summary": {
+    "optimal_memory_size": 1024,
+    "performance_improvement": 43.2,
+    "cost_savings": 28.7,
+    "cold_start_reduction": 35.8,
+    "recommendation": "Upgrade to 1024MB for optimal web API performance with significant cost savings",
+    "confidence_score": 0.92,
+    "estimated_monthly_savings": {
+      "low_traffic": {"amount": 45.80, "invocations": 100000},
+      "medium_traffic": {"amount": 287.50, "invocations": 500000},
+      "high_traffic": {"amount": 1150.00, "invocations": 2000000}
+    }
+  },
+  "results": [
+    {
+      "memory_size": 256,
+      "test_runs": [
+        {
+          "iteration": 1,
+          "duration_ms": 2847.3,
+          "billed_duration_ms": 2900,
+          "memory_used_mb": 185,
+          "cold_start": true,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:30:15.234Z"
+        },
+        {
+          "iteration": 2,
+          "duration_ms": 1823.7,
+          "billed_duration_ms": 1900,
+          "memory_used_mb": 178,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:30:25.567Z"
+        },
+        {
+          "iteration": 3,
+          "duration_ms": 1891.2,
+          "billed_duration_ms": 1900,
+          "memory_used_mb": 182,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:30:35.891Z"
+        },
+        {
+          "iteration": 4,
+          "duration_ms": 1767.8,
+          "billed_duration_ms": 1800,
+          "memory_used_mb": 176,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:30:45.123Z"
+        },
+        {
+          "iteration": 5,
+          "duration_ms": 2934.1,
+          "billed_duration_ms": 3000,
+          "memory_used_mb": 189,
+          "cold_start": true,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:31:15.456Z"
+        },
+        {
+          "iteration": 6,
+          "duration_ms": 1845.6,
+          "billed_duration_ms": 1900,
+          "memory_used_mb": 181,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:31:25.789Z"
+        },
+        {
+          "iteration": 7,
+          "duration_ms": 1798.3,
+          "billed_duration_ms": 1800,
+          "memory_used_mb": 179,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:31:35.012Z"
+        },
+        {
+          "iteration": 8,
+          "duration_ms": 1812.9,
+          "billed_duration_ms": 1900,
+          "memory_used_mb": 183,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:31:45.345Z"
+        },
+        {
+          "iteration": 9,
+          "duration_ms": 1756.4,
+          "billed_duration_ms": 1800,
+          "memory_used_mb": 177,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:31:55.678Z"
+        },
+        {
+          "iteration": 10,
+          "duration_ms": 1889.7,
+          "billed_duration_ms": 1900,
+          "memory_used_mb": 184,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:32:05.901Z"
+        }
+      ],
+      "analysis": {
+        "avg_duration": 1936.7,
+        "min_duration": 1756.4,
+        "max_duration": 2934.1,
+        "p50_duration": 1847.0,
+        "p95_duration": 2890.7,
+        "p99_duration": 2934.1,
+        "std_deviation": 420.8,
+        "cold_start_count": 2,
+        "cold_start_ratio": 0.20,
+        "avg_cold_start_duration": 2890.7,
+        "avg_warm_start_duration": 1810.6,
+        "cold_start_penalty_ms": 1080.1,
+        "error_count": 0,
+        "error_rate": 0.0,
+        "success_rate": 1.0,
+        "memory_utilization": 0.708
+      },
+      "cost_analysis": {
+        "avg_cost_per_invocation": 0.000004892,
+        "total_cost": 0.00004892,
+        "cost_per_gb_second": 0.0000166667,
+        "monthly_cost_1m_invocations": 4.89,
+        "yearly_cost_1m_invocations": 58.68
+      }
+    },
+    {
+      "memory_size": 512,
+      "test_runs": [
+        {
+          "iteration": 1,
+          "duration_ms": 1567.2,
+          "billed_duration_ms": 1600,
+          "memory_used_mb": 231,
+          "cold_start": true,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:32:15.234Z"
+        },
+        {
+          "iteration": 2,
+          "duration_ms": 894.6,
+          "billed_duration_ms": 900,
+          "memory_used_mb": 218,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:32:25.567Z"
+        },
+        {
+          "iteration": 3,
+          "duration_ms": 923.8,
+          "billed_duration_ms": 1000,
+          "memory_used_mb": 225,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:32:35.891Z"
+        },
+        {
+          "iteration": 4,
+          "duration_ms": 876.3,
+          "billed_duration_ms": 900,
+          "memory_used_mb": 212,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:32:45.123Z"
+        },
+        {
+          "iteration": 5,
+          "duration_ms": 1612.4,
+          "billed_duration_ms": 1700,
+          "memory_used_mb": 238,
+          "cold_start": true,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:33:15.456Z"
+        },
+        {
+          "iteration": 6,
+          "duration_ms": 901.7,
+          "billed_duration_ms": 1000,
+          "memory_used_mb": 220,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:33:25.789Z"
+        },
+        {
+          "iteration": 7,
+          "duration_ms": 887.2,
+          "billed_duration_ms": 900,
+          "memory_used_mb": 216,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:33:35.012Z"
+        },
+        {
+          "iteration": 8,
+          "duration_ms": 912.5,
+          "billed_duration_ms": 1000,
+          "memory_used_mb": 223,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:33:45.345Z"
+        },
+        {
+          "iteration": 9,
+          "duration_ms": 865.1,
+          "billed_duration_ms": 900,
+          "memory_used_mb": 214,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:33:55.678Z"
+        },
+        {
+          "iteration": 10,
+          "duration_ms": 934.3,
+          "billed_duration_ms": 1000,
+          "memory_used_mb": 227,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:34:05.901Z"
+        }
+      ],
+      "analysis": {
+        "avg_duration": 1037.5,
+        "min_duration": 865.1,
+        "max_duration": 1612.4,
+        "p50_duration": 904.2,
+        "p95_duration": 1589.8,
+        "p99_duration": 1612.4,
+        "std_deviation": 284.1,
+        "cold_start_count": 2,
+        "cold_start_ratio": 0.20,
+        "avg_cold_start_duration": 1589.8,
+        "avg_warm_start_duration": 899.4,
+        "cold_start_penalty_ms": 690.4,
+        "error_count": 0,
+        "error_rate": 0.0,
+        "success_rate": 1.0,
+        "memory_utilization": 0.437
+      },
+      "cost_analysis": {
+        "avg_cost_per_invocation": 0.000003681,
+        "total_cost": 0.00003681,
+        "cost_per_gb_second": 0.0000166667,
+        "monthly_cost_1m_invocations": 3.68,
+        "yearly_cost_1m_invocations": 44.16
+      }
+    },
+    {
+      "memory_size": 1024,
+      "test_runs": [
+        {
+          "iteration": 1,
+          "duration_ms": 823.4,
+          "billed_duration_ms": 900,
+          "memory_used_mb": 312,
+          "cold_start": true,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:34:15.234Z"
+        },
+        {
+          "iteration": 2,
+          "duration_ms": 456.7,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 298,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:34:25.567Z"
+        },
+        {
+          "iteration": 3,
+          "duration_ms": 478.3,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 304,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:34:35.891Z"
+        },
+        {
+          "iteration": 4,
+          "duration_ms": 445.1,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 295,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:34:45.123Z"
+        },
+        {
+          "iteration": 5,
+          "duration_ms": 867.9,
+          "billed_duration_ms": 900,
+          "memory_used_mb": 318,
+          "cold_start": true,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:35:15.456Z"
+        },
+        {
+          "iteration": 6,
+          "duration_ms": 467.2,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 301,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:35:25.789Z"
+        },
+        {
+          "iteration": 7,
+          "duration_ms": 452.8,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 296,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:35:35.012Z"
+        },
+        {
+          "iteration": 8,
+          "duration_ms": 489.6,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 307,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:35:45.345Z"
+        },
+        {
+          "iteration": 9,
+          "duration_ms": 434.7,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 293,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:35:55.678Z"
+        },
+        {
+          "iteration": 10,
+          "duration_ms": 476.1,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 302,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:36:05.901Z"
+        }
+      ],
+      "analysis": {
+        "avg_duration": 539.2,
+        "min_duration": 434.7,
+        "max_duration": 867.9,
+        "p50_duration": 467.2,
+        "p95_duration": 845.7,
+        "p99_duration": 867.9,
+        "std_deviation": 162.3,
+        "cold_start_count": 2,
+        "cold_start_ratio": 0.20,
+        "avg_cold_start_duration": 845.7,
+        "avg_warm_start_duration": 462.6,
+        "cold_start_penalty_ms": 383.1,
+        "error_count": 0,
+        "error_rate": 0.0,
+        "success_rate": 1.0,
+        "memory_utilization": 0.298
+      },
+      "cost_analysis": {
+        "avg_cost_per_invocation": 0.000003486,
+        "total_cost": 0.00003486,
+        "cost_per_gb_second": 0.0000166667,
+        "monthly_cost_1m_invocations": 3.49,
+        "yearly_cost_1m_invocations": 41.88
+      }
+    },
+    {
+      "memory_size": 1536,
+      "test_runs": [
+        {
+          "iteration": 1,
+          "duration_ms": 712.3,
+          "billed_duration_ms": 800,
+          "memory_used_mb": 389,
+          "cold_start": true,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:36:15.234Z"
+        },
+        {
+          "iteration": 2,
+          "duration_ms": 421.8,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 365,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:36:25.567Z"
+        },
+        {
+          "iteration": 3,
+          "duration_ms": 439.2,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 372,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:36:35.891Z"
+        },
+        {
+          "iteration": 4,
+          "duration_ms": 408.7,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 361,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:36:45.123Z"
+        },
+        {
+          "iteration": 5,
+          "duration_ms": 754.6,
+          "billed_duration_ms": 800,
+          "memory_used_mb": 396,
+          "cold_start": true,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:37:15.456Z"
+        },
+        {
+          "iteration": 6,
+          "duration_ms": 428.3,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 368,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:37:25.789Z"
+        },
+        {
+          "iteration": 7,
+          "duration_ms": 415.9,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 363,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:37:35.012Z"
+        },
+        {
+          "iteration": 8,
+          "duration_ms": 447.1,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 375,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:37:45.345Z"
+        },
+        {
+          "iteration": 9,
+          "duration_ms": 401.2,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 359,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:37:55.678Z"
+        },
+        {
+          "iteration": 10,
+          "duration_ms": 434.5,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 370,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:38:05.901Z"
+        }
+      ],
+      "analysis": {
+        "avg_duration": 486.4,
+        "min_duration": 401.2,
+        "max_duration": 754.6,
+        "p50_duration": 431.4,
+        "p95_duration": 733.5,
+        "p99_duration": 754.6,
+        "std_deviation": 134.7,
+        "cold_start_count": 2,
+        "cold_start_ratio": 0.20,
+        "avg_cold_start_duration": 733.5,
+        "avg_warm_start_duration": 424.6,
+        "cold_start_penalty_ms": 308.9,
+        "error_count": 0,
+        "error_rate": 0.0,
+        "success_rate": 1.0,
+        "memory_utilization": 0.244
+      },
+      "cost_analysis": {
+        "avg_cost_per_invocation": 0.000004021,
+        "total_cost": 0.00004021,
+        "cost_per_gb_second": 0.0000166667,
+        "monthly_cost_1m_invocations": 4.02,
+        "yearly_cost_1m_invocations": 48.25
+      }
+    },
+    {
+      "memory_size": 2048,
+      "test_runs": [
+        {
+          "iteration": 1,
+          "duration_ms": 634.7,
+          "billed_duration_ms": 700,
+          "memory_used_mb": 456,
+          "cold_start": true,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:38:15.234Z"
+        },
+        {
+          "iteration": 2,
+          "duration_ms": 389.2,
+          "billed_duration_ms": 400,
+          "memory_used_mb": 423,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:38:25.567Z"
+        },
+        {
+          "iteration": 3,
+          "duration_ms": 401.8,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 431,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:38:35.891Z"
+        },
+        {
+          "iteration": 4,
+          "duration_ms": 374.3,
+          "billed_duration_ms": 400,
+          "memory_used_mb": 418,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:38:45.123Z"
+        },
+        {
+          "iteration": 5,
+          "duration_ms": 672.1,
+          "billed_duration_ms": 700,
+          "memory_used_mb": 463,
+          "cold_start": true,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:39:15.456Z"
+        },
+        {
+          "iteration": 6,
+          "duration_ms": 395.6,
+          "billed_duration_ms": 400,
+          "memory_used_mb": 427,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:39:25.789Z"
+        },
+        {
+          "iteration": 7,
+          "duration_ms": 382.4,
+          "billed_duration_ms": 400,
+          "memory_used_mb": 421,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:39:35.012Z"
+        },
+        {
+          "iteration": 8,
+          "duration_ms": 407.9,
+          "billed_duration_ms": 500,
+          "memory_used_mb": 434,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:39:45.345Z"
+        },
+        {
+          "iteration": 9,
+          "duration_ms": 367.8,
+          "billed_duration_ms": 400,
+          "memory_used_mb": 415,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:39:55.678Z"
+        },
+        {
+          "iteration": 10,
+          "duration_ms": 398.7,
+          "billed_duration_ms": 400,
+          "memory_used_mb": 429,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:40:05.901Z"
+        }
+      ],
+      "analysis": {
+        "avg_duration": 442.5,
+        "min_duration": 367.8,
+        "max_duration": 672.1,
+        "p50_duration": 396.8,
+        "p95_duration": 653.4,
+        "p99_duration": 672.1,
+        "std_deviation": 112.4,
+        "cold_start_count": 2,
+        "cold_start_ratio": 0.20,
+        "avg_cold_start_duration": 653.4,
+        "avg_warm_start_duration": 389.7,
+        "cold_start_penalty_ms": 263.7,
+        "error_count": 0,
+        "error_rate": 0.0,
+        "success_rate": 1.0,
+        "memory_utilization": 0.213
+      },
+      "cost_analysis": {
+        "avg_cost_per_invocation": 0.000004562,
+        "total_cost": 0.00004562,
+        "cost_per_gb_second": 0.0000166667,
+        "monthly_cost_1m_invocations": 4.56,
+        "yearly_cost_1m_invocations": 54.74
+      }
+    },
+    {
+      "memory_size": 3008,
+      "test_runs": [
+        {
+          "iteration": 1,
+          "duration_ms": 578.3,
+          "billed_duration_ms": 600,
+          "memory_used_mb": 523,
+          "cold_start": true,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:40:15.234Z"
+        },
+        {
+          "iteration": 2,
+          "duration_ms": 356.7,
+          "billed_duration_ms": 400,
+          "memory_used_mb": 487,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:40:25.567Z"
+        },
+        {
+          "iteration": 3,
+          "duration_ms": 371.2,
+          "billed_duration_ms": 400,
+          "memory_used_mb": 495,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:40:35.891Z"
+        },
+        {
+          "iteration": 4,
+          "duration_ms": 342.8,
+          "billed_duration_ms": 400,
+          "memory_used_mb": 481,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:40:45.123Z"
+        },
+        {
+          "iteration": 5,
+          "duration_ms": 612.5,
+          "billed_duration_ms": 700,
+          "memory_used_mb": 531,
+          "cold_start": true,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:41:15.456Z"
+        },
+        {
+          "iteration": 6,
+          "duration_ms": 363.4,
+          "billed_duration_ms": 400,
+          "memory_used_mb": 491,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:41:25.789Z"
+        },
+        {
+          "iteration": 7,
+          "duration_ms": 349.1,
+          "billed_duration_ms": 400,
+          "memory_used_mb": 484,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:41:35.012Z"
+        },
+        {
+          "iteration": 8,
+          "duration_ms": 378.6,
+          "billed_duration_ms": 400,
+          "memory_used_mb": 498,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:41:45.345Z"
+        },
+        {
+          "iteration": 9,
+          "duration_ms": 334.2,
+          "billed_duration_ms": 400,
+          "memory_used_mb": 478,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:41:55.678Z"
+        },
+        {
+          "iteration": 10,
+          "duration_ms": 365.9,
+          "billed_duration_ms": 400,
+          "memory_used_mb": 493,
+          "cold_start": false,
+          "status_code": 200,
+          "error": null,
+          "timestamp": "2024-01-15T14:42:05.901Z"
+        }
+      ],
+      "analysis": {
+        "avg_duration": 405.3,
+        "min_duration": 334.2,
+        "max_duration": 612.5,
+        "p50_duration": 364.7,
+        "p95_duration": 595.4,
+        "p99_duration": 612.5,
+        "std_deviation": 98.7,
+        "cold_start_count": 2,
+        "cold_start_ratio": 0.20,
+        "avg_cold_start_duration": 595.4,
+        "avg_warm_start_duration": 357.7,
+        "cold_start_penalty_ms": 237.7,
+        "error_count": 0,
+        "error_rate": 0.0,
+        "success_rate": 1.0,
+        "memory_utilization": 0.166
+      },
+      "cost_analysis": {
+        "avg_cost_per_invocation": 0.000006234,
+        "total_cost": 0.00006234,
+        "cost_per_gb_second": 0.0000166667,
+        "monthly_cost_1m_invocations": 6.23,
+        "yearly_cost_1m_invocations": 74.81
+      }
+    }
+  ],
+  "performance_analysis": {
+    "optimal_configuration": {
+      "memory_size": 1024,
+      "avg_duration": 539.2,
+      "p95_duration": 845.7,
+      "cost_per_invocation": 0.000003486,
+      "cold_start_penalty": 383.1,
+      "reasoning": "Provides best balance of performance and cost for web API workloads"
+    },
+    "performance_trends": {
+      "duration_improvement": {
+        "256_to_1024": -72.2,
+        "1024_to_3008": -24.8
+      },
+      "cost_trends": {
+        "optimal_range": "512MB - 1024MB",
+        "diminishing_returns_threshold": 1536
+      },
+      "cold_start_analysis": {
+        "best_cold_start_memory": 3008,
+        "avg_cold_start_penalty_reduction": 77.4,
+        "cold_start_frequency_stable": true
+      }
+    },
+    "efficiency_scores": {
+      "256": 2.1,
+      "512": 6.8,
+      "1024": 10.0,
+      "1536": 8.7,
+      "2048": 7.4,
+      "3008": 5.2
+    }
+  },
+  "workload_specific_analysis": {
+    "workload_type": "web_api",
+    "key_metrics": {
+      "p95_latency_target": "< 1000ms",
+      "p95_latency_achieved": 845.7,
+      "target_met": true,
+      "cold_start_tolerance": "< 15%",
+      "cold_start_percentage": 20.0,
+      "cold_start_acceptable": false,
+      "cost_efficiency_score": 8.7,
+      "memory_utilization_efficiency": 0.298
+    },
+    "web_api_recommendations": [
+      {
+        "priority": "high",
+        "category": "performance",
+        "title": "Optimal Memory Configuration",
+        "description": "Set Lambda memory to 1024MB for optimal web API performance",
+        "impact": "43.2% performance improvement, 28.7% cost reduction"
+      },
+      {
+        "priority": "medium",
+        "category": "cold_starts",
+        "title": "Cold Start Optimization",
+        "description": "Consider provisioned concurrency for consistent sub-second response times",
+        "impact": "Eliminates 20% of requests with >800ms response time"
+      },
+      {
+        "priority": "low",
+        "category": "monitoring",
+        "title": "Performance Monitoring",
+        "description": "Implement CloudWatch alarms for p95 latency > 1000ms",
+        "impact": "Proactive performance monitoring"
+      }
+    ],
+    "scaling_characteristics": {
+      "concurrency_limit_recommended": 100,
+      "provisioned_concurrency_recommendation": 10,
+      "burst_handling": "excellent",
+      "steady_state_performance": "optimal"
+    }
+  },
+  "cost_projections": {
+    "scenarios": {
+      "low_traffic": {
+        "daily_invocations": 3333,
+        "monthly_invocations": 100000,
+        "current_cost": 4.89,
+        "optimized_cost": 3.49,
+        "monthly_savings": 1.40,
+        "annual_savings": 16.80
+      },
+      "medium_traffic": {
+        "daily_invocations": 16667,
+        "monthly_invocations": 500000,
+        "current_cost": 24.45,
+        "optimized_cost": 17.45,
+        "monthly_savings": 7.00,
+        "annual_savings": 84.00
+      },
+      "high_traffic": {
+        "daily_invocations": 66667,
+        "monthly_invocations": 2000000,
+        "current_cost": 97.80,
+        "optimized_cost": 69.80,
+        "monthly_savings": 28.00,
+        "annual_savings": 336.00
+      }
+    },
+    "roi_analysis": {
+      "implementation_effort": "minimal",
+      "payback_period_days": 1,
+      "break_even_invocations": 1000,
+      "risk_level": "low"
+    }
+  },
+  "cold_start_analysis": {
+    "detailed_metrics": {
+      "total_cold_starts": 12,
+      "total_invocations": 60,
+      "cold_start_rate": 0.20,
+      "avg_cold_start_duration": 1274.5,
+      "avg_warm_start_duration": 629.2,
+      "cold_start_penalty": 645.3,
+      "memory_impact_on_cold_starts": {
+        "256mb_penalty": 1080.1,
+        "512mb_penalty": 690.4,
+        "1024mb_penalty": 383.1,
+        "1536mb_penalty": 308.9,
+        "2048mb_penalty": 263.7,
+        "3008mb_penalty": 237.7
+      }
+    },
+    "optimization_opportunities": [
+      {
+        "technique": "provisioned_concurrency",
+        "estimated_improvement": "100% cold start elimination",
+        "cost_impact": "+15-20% base cost",
+        "recommendation": "Use for critical endpoints"
+      },
+      {
+        "technique": "memory_optimization",
+        "estimated_improvement": "64.5% cold start penalty reduction",
+        "cost_impact": "28.7% cost reduction",
+        "recommendation": "Immediate implementation"
+      },
+      {
+        "technique": "connection_pooling",
+        "estimated_improvement": "10-15% warm start improvement",
+        "cost_impact": "negligible",
+        "recommendation": "Implement for database connections"
+      }
+    ]
+  },
+  "recommendations": {
+    "immediate_actions": [
+      {
+        "action": "Update Lambda memory configuration to 1024MB",
+        "expected_impact": "43.2% performance improvement, 28.7% cost reduction",
+        "implementation_complexity": "low",
+        "risk_level": "minimal"
+      }
+    ],
+    "medium_term_actions": [
+      {
+        "action": "Implement provisioned concurrency for high-traffic endpoints",
+        "expected_impact": "Eliminate cold starts for critical paths",
+        "implementation_complexity": "medium",
+        "risk_level": "low"
+      },
+      {
+        "action": "Optimize application initialization code",
+        "expected_impact": "Additional 10-20% cold start reduction",
+        "implementation_complexity": "medium",
+        "risk_level": "low"
+      }
+    ],
+    "monitoring_recommendations": [
+      {
+        "metric": "p95_duration",
+        "threshold": 1000,
+        "action": "Alert if exceeded for 5 minutes"
+      },
+      {
+        "metric": "cold_start_rate",
+        "threshold": 0.15,
+        "action": "Evaluate provisioned concurrency"
+      },
+      {
+        "metric": "error_rate",
+        "threshold": 0.01,
+        "action": "Immediate investigation required"
+      }
+    ]
+  },
+  "comparative_analysis": {
+    "baseline_vs_optimal": {
+      "baseline_memory": 256,
+      "optimal_memory": 1024,
+      "performance_improvement": 72.2,
+      "cost_improvement": 28.7,
+      "cold_start_improvement": 64.5,
+      "memory_efficiency_improvement": 58.9
+    },
+    "diminishing_returns_analysis": {
+      "threshold_memory": 1536,
+      "performance_plateau": "Beyond 1536MB shows minimal duration improvement",
+      "cost_effectiveness": "1024MB provides best price-performance ratio"
+    }
+  },
+  "quality_metrics": {
+    "test_reliability": {
+      "total_invocations": 60,
+      "successful_invocations": 60,
+      "failed_invocations": 0,
+      "success_rate": 1.0,
+      "data_quality_score": 0.98
+    },
+    "statistical_significance": {
+      "sample_size_adequate": true,
+      "variance_acceptable": true,
+      "confidence_interval": 0.95,
+      "margin_of_error": 0.03
+    }
+  }
+}

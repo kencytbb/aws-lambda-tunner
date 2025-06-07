@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Lambda Performance Tuning Report - Web API Analysis</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header .subtitle {
+            color: #7f8c8d;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .header .meta-info {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #5a6c7d;
+            font-weight: 500;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .summary-card.optimal {
+            border-left: 5px solid #27ae60;
+            background: linear-gradient(135deg, rgba(39, 174, 96, 0.1), rgba(255, 255, 255, 0.95));
+        }
+
+        .summary-card.performance {
+            border-left: 5px solid #3498db;
+            background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(255, 255, 255, 0.95));
+        }
+
+        .summary-card.cost {
+            border-left: 5px solid #f39c12;
+            background: linear-gradient(135deg, rgba(243, 156, 18, 0.1), rgba(255, 255, 255, 0.95));
+        }
+
+        .summary-card.cold-start {
+            border-left: 5px solid #e74c3c;
+            background: linear-gradient(135deg, rgba(231, 76, 60, 0.1), rgba(255, 255, 255, 0.95));
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .card-metric {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .card-description {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .chart-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chart-container {
+            height: 400px;
+            margin-bottom: 20px;
+        }
+
+        .chart-container.large {
+            height: 500px;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .recommendations {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .recommendation-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #3498db;
+            transition: all 0.3s ease;
+        }
+
+        .recommendation-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+
+        .recommendation-item.high-priority {
+            border-left-color: #e74c3c;
+        }
+
+        .recommendation-item.medium-priority {
+            border-left-color: #f39c12;
+        }
+
+        .recommendation-item.low-priority {
+            border-left-color: #27ae60;
+        }
+
+        .recommendation-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .recommendation-title {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+
+        .priority-badge {
+            background: #3498db;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .priority-badge.high {
+            background: #e74c3c;
+        }
+
+        .priority-badge.medium {
+            background: #f39c12;
+        }
+
+        .priority-badge.low {
+            background: #27ae60;
+        }
+
+        .recommendation-description {
+            color: #5a6c7d;
+            margin-bottom: 10px;
+        }
+
+        .recommendation-impact {
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.9em;
+            color: #2980b9;
+            font-weight: 500;
+        }
+
+        .details-table {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background: rgba(52, 152, 219, 0.05);
+        }
+
+        .optimal-row {
+            background: rgba(39, 174, 96, 0.1) !important;
+            font-weight: 600;
+        }
+
+        .metric-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 500;
+        }
+
+        .trend-up {
+            background: rgba(231, 76, 60, 0.1);
+            color: #c0392b;
+        }
+
+        .trend-down {
+            background: rgba(39, 174, 96, 0.1);
+            color: #27ae60;
+        }
+
+        .cold-start-analysis {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .analysis-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .analysis-metric {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .analysis-metric-value {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .analysis-metric-label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .footer {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            color: #7f8c8d;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header .meta-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            white-space: nowrap;
+            z-index: 1000;
+        }
+
+        .cost-projection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .projection-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .projection-header {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .projection-metric {
+            display: flex;
+            justify-content: between;
+            margin-bottom: 8px;
+        }
+
+        .projection-label {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .projection-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .savings {
+            color: #27ae60;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> AWS Lambda Performance Tuning Report</h1>
+            <div class="subtitle">Web API Workload Analysis & Optimization</div>
+            <div class="meta-info">
+                <div class="meta-item">
+                    <i class="fas fa-function"></i>
+                    <span>web-api-handler</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-calendar"></i>
+                    <span>January 15, 2024</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-globe"></i>
+                    <span>us-east-1</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Balanced Strategy</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-clock"></i>
+                    <span>40 min test</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="summary-card optimal">
+                <div class="card-header">
+                    <i class="fas fa-trophy card-icon" style="color: #27ae60;"></i>
+                    <div class="card-title">Optimal Configuration</div>
+                </div>
+                <div class="card-metric">1024 MB</div>
+                <div class="card-description">Best balance of performance and cost for web API workloads</div>
+            </div>
+
+            <div class="summary-card performance">
+                <div class="card-header">
+                    <i class="fas fa-rocket card-icon" style="color: #3498db;"></i>
+                    <div class="card-title">Performance Improvement</div>
+                </div>
+                <div class="card-metric">72.2%</div>
+                <div class="card-description">Average response time reduction vs 256MB baseline</div>
+            </div>
+
+            <div class="summary-card cost">
+                <div class="card-header">
+                    <i class="fas fa-dollar-sign card-icon" style="color: #f39c12;"></i>
+                    <div class="card-title">Cost Savings</div>
+                </div>
+                <div class="card-metric">28.7%</div>
+                <div class="card-description">Monthly cost reduction with optimal configuration</div>
+            </div>
+
+            <div class="summary-card cold-start">
+                <div class="card-header">
+                    <i class="fas fa-thermometer-quarter card-icon" style="color: #e74c3c;"></i>
+                    <div class="card-title">Cold Start Reduction</div>
+                </div>
+                <div class="card-metric">64.5%</div>
+                <div class="card-description">Cold start penalty reduction with 1024MB</div>
+            </div>
+        </div>
+
+        <!-- Performance Charts -->
+        <div class="chart-section">
+            <div class="chart-title">
+                <i class="fas fa-chart-bar"></i>
+                Performance Analysis by Memory Configuration
+            </div>
+            <div class="chart-container large" id="performanceChart"></div>
+        </div>
+
+        <div class="chart-grid">
+            <div class="chart-section">
+                <div class="chart-title">
+                    <i class="fas fa-coins"></i>
+                    Cost Analysis
+                </div>
+                <div class="chart-container" id="costChart"></div>
+            </div>
+
+            <div class="chart-section">
+                <div class="chart-title">
+                    <i class="fas fa-snowflake"></i>
+                    Cold Start Impact
+                </div>
+                <div class="chart-container" id="coldStartChart"></div>
+            </div>
+        </div>
+
+        <!-- Cost Projections -->
+        <div class="recommendations">
+            <div class="chart-title">
+                <i class="fas fa-calculator"></i>
+                Cost Projections & ROI Analysis
+            </div>
+            <div class="cost-projection">
+                <div class="projection-card">
+                    <div class="projection-header">Low Traffic (100K/month)</div>
+                    <div class="projection-metric">
+                        <span class="projection-label">Current Cost:</span>
+                        <span class="projection-value">$4.89</span>
+                    </div>
+                    <div class="projection-metric">
+                        <span class="projection-label">Optimized Cost:</span>
+                        <span class="projection-value">$3.49</span>
+                    </div>
+                    <div class="projection-metric">
+                        <span class="projection-label">Monthly Savings:</span>
+                        <span class="projection-value savings">$1.40</span>
+                    </div>
+                    <div class="projection-metric">
+                        <span class="projection-label">Annual Savings:</span>
+                        <span class="projection-value savings">$16.80</span>
+                    </div>
+                </div>
+
+                <div class="projection-card">
+                    <div class="projection-header">Medium Traffic (500K/month)</div>
+                    <div class="projection-metric">
+                        <span class="projection-label">Current Cost:</span>
+                        <span class="projection-value">$24.45</span>
+                    </div>
+                    <div class="projection-metric">
+                        <span class="projection-label">Optimized Cost:</span>
+                        <span class="projection-value">$17.45</span>
+                    </div>
+                    <div class="projection-metric">
+                        <span class="projection-label">Monthly Savings:</span>
+                        <span class="projection-value savings">$7.00</span>
+                    </div>
+                    <div class="projection-metric">
+                        <span class="projection-label">Annual Savings:</span>
+                        <span class="projection-value savings">$84.00</span>
+                    </div>
+                </div>
+
+                <div class="projection-card">
+                    <div class="projection-header">High Traffic (2M/month)</div>
+                    <div class="projection-metric">
+                        <span class="projection-label">Current Cost:</span>
+                        <span class="projection-value">$97.80</span>
+                    </div>
+                    <div class="projection-metric">
+                        <span class="projection-label">Optimized Cost:</span>
+                        <span class="projection-value">$69.80</span>
+                    </div>
+                    <div class="projection-metric">
+                        <span class="projection-label">Monthly Savings:</span>
+                        <span class="projection-value savings">$28.00</span>
+                    </div>
+                    <div class="projection-metric">
+                        <span class="projection-label">Annual Savings:</span>
+                        <span class="projection-value savings">$336.00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cold Start Analysis -->
+        <div class="cold-start-analysis">
+            <div class="chart-title">
+                <i class="fas fa-thermometer-quarter"></i>
+                Cold Start Analysis & Optimization Opportunities
+            </div>
+            <div class="analysis-grid">
+                <div class="analysis-metric">
+                    <div class="analysis-metric-value">20%</div>
+                    <div class="analysis-metric-label">Cold Start Rate</div>
+                </div>
+                <div class="analysis-metric">
+                    <div class="analysis-metric-value">1,274ms</div>
+                    <div class="analysis-metric-label">Avg Cold Start</div>
+                </div>
+                <div class="analysis-metric">
+                    <div class="analysis-metric-value">629ms</div>
+                    <div class="analysis-metric-label">Avg Warm Start</div>
+                </div>
+                <div class="analysis-metric">
+                    <div class="analysis-metric-value">645ms</div>
+                    <div class="analysis-metric-label">Cold Start Penalty</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Optimization Chart -->
+        <div class="chart-section">
+            <div class="chart-title">
+                <i class="fas fa-balance-scale"></i>
+                Cost vs Performance Optimization Curve
+            </div>
+            <div class="chart-container large" id="optimizationChart"></div>
+        </div>
+
+        <!-- Recommendations -->
+        <div class="recommendations">
+            <div class="chart-title">
+                <i class="fas fa-lightbulb"></i>
+                Optimization Recommendations
+            </div>
+
+            <div class="recommendation-item high-priority">
+                <div class="recommendation-header">
+                    <div class="recommendation-title">Immediate: Update Memory Configuration</div>
+                    <span class="priority-badge high">High Priority</span>
+                </div>
+                <div class="recommendation-description">
+                    Set Lambda memory to 1024MB for optimal web API performance. This configuration provides the best balance of response time and cost efficiency.
+                </div>
+                <div class="recommendation-impact">
+                    <i class="fas fa-arrow-up"></i> Impact: 72.2% performance improvement, 28.7% cost reduction
+                </div>
+            </div>
+
+            <div class="recommendation-item medium-priority">
+                <div class="recommendation-header">
+                    <div class="recommendation-title">Medium-term: Implement Provisioned Concurrency</div>
+                    <span class="priority-badge medium">Medium Priority</span>
+                </div>
+                <div class="recommendation-description">
+                    Consider provisioned concurrency for high-traffic endpoints to eliminate cold starts completely. Recommended for endpoints requiring consistent sub-second response times.
+                </div>
+                <div class="recommendation-impact">
+                    <i class="fas fa-arrow-up"></i> Impact: 100% cold start elimination, +15-20% base cost
+                </div>
+            </div>
+
+            <div class="recommendation-item low-priority">
+                <div class="recommendation-header">
+                    <div class="recommendation-title">Long-term: Performance Monitoring Setup</div>
+                    <span class="priority-badge low">Low Priority</span>
+                </div>
+                <div class="recommendation-description">
+                    Implement CloudWatch alarms for p95 latency monitoring and set up automated alerts for performance degradation.
+                </div>
+                <div class="recommendation-impact">
+                    <i class="fas fa-shield-alt"></i> Impact: Proactive performance monitoring and alerting
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Results Table -->
+        <div class="details-table">
+            <div class="chart-title">
+                <i class="fas fa-table"></i>
+                Detailed Performance Metrics
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Memory (MB)</th>
+                        <th>Avg Duration (ms)</th>
+                        <th>P95 Duration (ms)</th>
+                        <th>Cost per Invocation</th>
+                        <th>Cold Start Rate</th>
+                        <th>Cold Start Penalty</th>
+                        <th>Memory Utilization</th>
+                        <th>Efficiency Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>256</td>
+                        <td>1,936.7 <span class="metric-trend trend-up"><i class="fas fa-arrow-up"></i></span></td>
+                        <td>2,890.7</td>
+                        <td>$0.000004892</td>
+                        <td>20%</td>
+                        <td>1,080.1ms</td>
+                        <td>70.8%</td>
+                        <td>2.1</td>
+                    </tr>
+                    <tr>
+                        <td>512</td>
+                        <td>1,037.5 <span class="metric-trend trend-down"><i class="fas fa-arrow-down"></i></span></td>
+                        <td>1,589.8</td>
+                        <td>$0.000003681</td>
+                        <td>20%</td>
+                        <td>690.4ms</td>
+                        <td>43.7%</td>
+                        <td>6.8</td>
+                    </tr>
+                    <tr class="optimal-row">
+                        <td><strong>1024 ⭐</strong></td>
+                        <td><strong>539.2 <span class="metric-trend trend-down"><i class="fas fa-arrow-down"></i></span></strong></td>
+                        <td><strong>845.7</strong></td>
+                        <td><strong>$0.000003486</strong></td>
+                        <td><strong>20%</strong></td>
+                        <td><strong>383.1ms</strong></td>
+                        <td><strong>29.8%</strong></td>
+                        <td><strong>10.0</strong></td>
+                    </tr>
+                    <tr>
+                        <td>1536</td>
+                        <td>486.4 <span class="metric-trend trend-down"><i class="fas fa-arrow-down"></i></span></td>
+                        <td>733.5</td>
+                        <td>$0.000004021</td>
+                        <td>20%</td>
+                        <td>308.9ms</td>
+                        <td>24.4%</td>
+                        <td>8.7</td>
+                    </tr>
+                    <tr>
+                        <td>2048</td>
+                        <td>442.5 <span class="metric-trend trend-down"><i class="fas fa-arrow-down"></i></span></td>
+                        <td>653.4</td>
+                        <td>$0.000004562</td>
+                        <td>20%</td>
+                        <td>263.7ms</td>
+                        <td>21.3%</td>
+                        <td>7.4</td>
+                    </tr>
+                    <tr>
+                        <td>3008</td>
+                        <td>405.3 <span class="metric-trend trend-down"><i class="fas fa-arrow-down"></i></span></td>
+                        <td>595.4</td>
+                        <td>$0.000006234</td>
+                        <td>20%</td>
+                        <td>237.7ms</td>
+                        <td>16.6%</td>
+                        <td>5.2</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><i class="fas fa-robot"></i> Generated by AWS Lambda Tuner v2.1.0 | 
+            <i class="fas fa-clock"></i> Report generated on January 15, 2024 at 14:30 UTC |
+            <i class="fas fa-shield-alt"></i> Test completed with 100% success rate</p>
+        </div>
+    </div>
+
+    <script>
+        // Performance Chart
+        const performanceData = [
+            {
+                x: [256, 512, 1024, 1536, 2048, 3008],
+                y: [1936.7, 1037.5, 539.2, 486.4, 442.5, 405.3],
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'Average Duration',
+                line: {color: '#3498db', width: 3},
+                marker: {size: 10, color: '#3498db'}
+            },
+            {
+                x: [256, 512, 1024, 1536, 2048, 3008],
+                y: [2890.7, 1589.8, 845.7, 733.5, 653.4, 595.4],
+                type: 'scatter',
+                mode: 'lines+markers',
+                name: 'P95 Duration',
+                line: {color: '#e74c3c', width: 3, dash: 'dash'},
+                marker: {size: 8, color: '#e74c3c'}
+            }
+        ];
+
+        const performanceLayout = {
+            title: {
+                text: 'Performance vs Memory Configuration',
+                font: {size: 16, color: '#2c3e50'}
+            },
+            xaxis: {
+                title: 'Memory Size (MB)',
+                tickmode: 'array',
+                tickvals: [256, 512, 1024, 1536, 2048, 3008]
+            },
+            yaxis: {
+                title: 'Duration (ms)'
+            },
+            annotations: [{
+                x: 1024,
+                y: 539.2,
+                text: 'Optimal<br>1024MB',
+                showarrow: true,
+                arrowhead: 2,
+                arrowsize: 1,
+                arrowwidth: 2,
+                arrowcolor: '#27ae60',
+                font: {color: '#27ae60', size: 12}
+            }],
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            paper_bgcolor: 'rgba(0,0,0,0)'
+        };
+
+        Plotly.newPlot('performanceChart', performanceData, performanceLayout, {responsive: true});
+
+        // Cost Chart
+        const costData = [
+            {
+                x: [256, 512, 1024, 1536, 2048, 3008],
+                y: [4.892, 3.681, 3.486, 4.021, 4.562, 6.234],
+                type: 'bar',
+                name: 'Cost per 1M Invocations',
+                marker: {
+                    color: ['#e74c3c', '#f39c12', '#27ae60', '#3498db', '#9b59b6', '#95a5a6'],
+                    line: {color: '#2c3e50', width: 1}
+                }
+            }
+        ];
+
+        const costLayout = {
+            title: {
+                text: 'Monthly Cost (1M Invocations)',
+                font: {size: 16, color: '#2c3e50'}
+            },
+            xaxis: {
+                title: 'Memory Size (MB)',
+                tickmode: 'array',
+                tickvals: [256, 512, 1024, 1536, 2048, 3008]
+            },
+            yaxis: {
+                title: 'Cost ($)'
+            },
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            paper_bgcolor: 'rgba(0,0,0,0)'
+        };
+
+        Plotly.newPlot('costChart', costData, costLayout, {responsive: true});
+
+        // Cold Start Chart
+        const coldStartData = [
+            {
+                x: [256, 512, 1024, 1536, 2048, 3008],
+                y: [1080.1, 690.4, 383.1, 308.9, 263.7, 237.7],
+                type: 'bar',
+                name: 'Cold Start Penalty (ms)',
+                marker: {
+                    color: '#e74c3c',
+                    opacity: 0.7
+                }
+            }
+        ];
+
+        const coldStartLayout = {
+            title: {
+                text: 'Cold Start Penalty by Memory Size',
+                font: {size: 16, color: '#2c3e50'}
+            },
+            xaxis: {
+                title: 'Memory Size (MB)',
+                tickmode: 'array',
+                tickvals: [256, 512, 1024, 1536, 2048, 3008]
+            },
+            yaxis: {
+                title: 'Penalty (ms)'
+            },
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            paper_bgcolor: 'rgba(0,0,0,0)'
+        };
+
+        Plotly.newPlot('coldStartChart', coldStartData, coldStartLayout, {responsive: true});
+
+        // Optimization Curve
+        const optimizationData = [
+            {
+                x: [1936.7, 1037.5, 539.2, 486.4, 442.5, 405.3],
+                y: [4.892, 3.681, 3.486, 4.021, 4.562, 6.234],
+                mode: 'markers+text',
+                type: 'scatter',
+                text: ['256MB', '512MB', '1024MB', '1536MB', '2048MB', '3008MB'],
+                textposition: 'top center',
+                marker: {
+                    size: [8, 10, 16, 12, 10, 8],
+                    color: ['#e74c3c', '#f39c12', '#27ae60', '#3498db', '#9b59b6', '#95a5a6'],
+                    line: {color: '#2c3e50', width: 2}
+                },
+                name: 'Memory Configurations'
+            }
+        ];
+
+        const optimizationLayout = {
+            title: {
+                text: 'Cost vs Performance Trade-off',
+                font: {size: 16, color: '#2c3e50'}
+            },
+            xaxis: {
+                title: 'Average Duration (ms)'
+            },
+            yaxis: {
+                title: 'Cost per 1M Invocations ($)'
+            },
+            annotations: [{
+                x: 539.2,
+                y: 3.486,
+                text: 'Sweet Spot<br>Best Value',
+                showarrow: true,
+                arrowhead: 2,
+                arrowsize: 1,
+                arrowwidth: 2,
+                arrowcolor: '#27ae60',
+                font: {color: '#27ae60', size: 12}
+            }],
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            paper_bgcolor: 'rgba(0,0,0,0)'
+        };
+
+        Plotly.newPlot('optimizationChart', optimizationData, optimizationLayout, {responsive: true});
+
+        // Smooth scrolling for internal links
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add smooth hover effects to cards
+            const cards = document.querySelectorAll('.summary-card, .recommendation-item');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-2px)';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
