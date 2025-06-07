@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 @click.group()
-@click.version_option(version='1.0.0', prog_name='aws-lambda-tuner')
+@click.version_option(version='2.0.0', prog_name='aws-lambda-tuner')
 def cli():
     """AWS Lambda Performance Tuner - Optimize your Lambda functions for cost and performance."""
     pass

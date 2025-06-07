@@ -8,13 +8,13 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="aws-lambda-tuner",
-    version="1.0.0",
+    version="2.0.0",
     author="kencytbb",
     author_email="",
     description="AWS Lambda performance tuner for cost and speed optimization",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/kencytbb/aws-lambda-tunner",
+    url="https://github.com/kencytbb/aws-lambda-tuner",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",

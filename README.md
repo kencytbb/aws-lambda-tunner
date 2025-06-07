@@ -73,19 +73,59 @@ Real-time monitoring with KPI tracking:
 - AWS CLI configured with appropriate permissions
 - pip package manager
 
-### Install Dependencies
+### Install the Package
 ```bash
+# Install in development mode
+pip install -e .
+
+# Or install with dev dependencies
+pip install -e .[dev]
+
+# Or install production dependencies only
 pip install -r requirements.txt
 ```
 
-### Optional: Install with ML and Visualization Features
+### Verify Installation
 ```bash
-pip install -r requirements.txt[ml,viz]
+aws-lambda-tuner --version
 ```
 
 ## 🚀 Quick Start
 
-### 1. Workload-Aware Optimization
+### 1. Initialize Configuration
+```bash
+# Generate a configuration file
+aws-lambda-tuner init --template balanced
+
+# Edit the generated tuner.config.json with your function ARN and payload
+```
+
+### 2. Run Performance Tuning
+```bash
+# Using configuration file
+aws-lambda-tuner tune --config tuner.config.json
+
+# Or specify directly via CLI
+aws-lambda-tuner tune \
+  --function-arn arn:aws:lambda:us-east-1:123456789012:function:my-function \
+  --memory-sizes 256,512,1024,1536 \
+  --iterations 10 \
+  --strategy balanced
+```
+
+### 3. Generate Reports and Visualizations
+```bash
+# Generate reports from results
+aws-lambda-tuner report tuning-results/tuning-results.json --format summary
+
+# Create visualizations
+aws-lambda-tuner visualize tuning-results/tuning-results.json --charts all
+
+# Generate interactive dashboard
+aws-lambda-tuner dashboard tuning-results/tuning-results.json --workload-type web_api
+```
+
+### 4. Workload-Specific Optimization
 ```bash
 # Interactive workload wizard
 aws-lambda-tuner workload-wizard \
@@ -93,33 +133,11 @@ aws-lambda-tuner workload-wizard \
   --workload-type web_api \
   --interactive
 
-# Batch processing optimization
-aws-lambda-tuner workload-wizard \
-  --function-arn arn:aws:lambda:us-east-1:123456789012:function:etl \
-  --workload-type batch_processing
-```
-
-### 2. Generate Professional Reports
-```bash
-# Cost projection with multiple scenarios
-aws-lambda-tuner cost-projection results.json \
+# Cost projection analysis
+aws-lambda-tuner cost-projection tuning-results/tuning-results.json \
   --monthly-invocations 1000000 \
   --pattern bursty \
-  --format pdf
-
-# Interactive dashboard suite
-aws-lambda-tuner dashboard results.json \
-  --workload-type web_api \
-  --include-cost-scenarios \
-  --real-time-template
-```
-
-### 3. Advanced Configuration
-```bash
-# Generate workload-specific configuration
-aws-lambda-tuner init --workload-type continuous \
-  --expected-concurrency 100 \
-  --traffic-pattern steady
+  --format html
 ```
 
 ## 📋 Advanced Usage Examples
@@ -207,42 +225,105 @@ await exporter.export_excel(results, "analysis_workbook.xlsx")
 await report_gen.generate_interactive_dashboard("dashboard.html")
 ```
 
-## 🎯 CLI Commands
+## 🎯 CLI Commands Reference
 
-### Workload Wizard
+### Core Commands
+
+#### Initialize Configuration
 ```bash
-# Interactive optimization with guided workflow
-aws-lambda-tuner workload-wizard \
-  --function-arn arn:aws:lambda:us-east-1:123456789012:function:api \
-  --interactive
+aws-lambda-tuner init [OPTIONS]
+  --output, -o          Output configuration file path (default: tuner.config.json)
+  --template, -t        Template: speed, cost, balanced, comprehensive (default: balanced)
 ```
 
-### Cost Projection
+#### Run Performance Tuning
 ```bash
-# Generate cost analysis for different scenarios
-aws-lambda-tuner cost-projection results.json \
-  --scenarios startup,growing,enterprise \
-  --format excel \
-  --include-roi-analysis
+aws-lambda-tuner tune [OPTIONS]
+  --config, -c          Configuration file path
+  --function-arn, -f    Lambda function ARN
+  --payload, -p         JSON payload for Lambda invocation
+  --payload-file        File containing JSON payload
+  --memory-sizes, -m    Comma-separated memory sizes (e.g., 256,512,1024)
+  --iterations, -i      Number of iterations per memory size (default: 10)
+  --strategy, -s        Optimization strategy: speed, cost, balanced (default: balanced)
+  --concurrent          Number of concurrent executions (default: 5)
+  --timeout             Lambda execution timeout in seconds (default: 300)
+  --output-dir, -o      Output directory for results (default: ./tuning-results)
+  --dry-run             Perform a dry run without invoking Lambda
+  --format              Output format: json, csv, html (default: json)
+  --visualize           Generate visualization charts
+  --verbose, -v         Enable verbose logging
 ```
 
-### Workload Comparison
+#### Generate Reports
 ```bash
-# Compare optimization across workload types
-aws-lambda-tuner compare-workloads \
-  --results results1.json,results2.json,results3.json \
-  --workload-types web_api,batch_processing,scheduled \
-  --format html
+aws-lambda-tuner report RESULTS-FILE [OPTIONS]
+  --format              Report format: summary, detailed, json (default: summary)
 ```
 
-### Dashboard Generation
+#### Create Visualizations
 ```bash
-# Create interactive dashboard suite
-aws-lambda-tuner dashboard results.json \
-  --workload-type web_api \
-  --include-cost-scenarios \
-  --real-time-template \
-  --export-path ./dashboards/
+aws-lambda-tuner visualize RESULTS-FILE [OPTIONS]
+  --output-dir, -o      Output directory for charts (default: ./visualizations)
+  --charts, -c          Charts to generate: performance, cost, distribution, optimization, all
+```
+
+### Advanced Commands
+
+#### Workload Wizard
+```bash
+aws-lambda-tuner workload-wizard [OPTIONS]
+  --function-arn, -f    Lambda function ARN (required)
+  --workload-type, -w   web_api, batch_processing, event_driven, scheduled, stream_processing
+  --output-dir, -o      Output directory (default: ./workload-analysis)
+  --interactive         Interactive workload configuration
+```
+
+#### Cost Projection
+```bash
+aws-lambda-tuner cost-projection RESULTS-FILE [OPTIONS]
+  --scenarios-file      JSON file with cost projection scenarios
+  --monthly-invocations Monthly invocations for cost projection (default: 1000000)
+  --pattern             Traffic pattern: steady, bursty, seasonal, growth (default: steady)
+  --output-dir, -o      Output directory (default: ./cost-analysis)
+  --format              Export format: html, pdf, excel, json (default: html)
+```
+
+#### Workload Comparison
+```bash
+aws-lambda-tuner compare-workloads RESULTS-FILES... [OPTIONS]
+  --workload-types      Comma-separated workload types for comparison
+  --output-dir, -o      Output directory (default: ./comparison)
+  --interactive-dashboard Generate interactive comparison dashboard
+```
+
+#### Dashboard Generation
+```bash
+aws-lambda-tuner dashboard RESULTS-FILE [OPTIONS]
+  --output-dir, -o      Output directory (default: ./dashboard)
+  --workload-type, -w   Workload type for specialized dashboard (default: generic)
+  --include-cost-scenarios Include cost projection scenarios
+  --real-time-template  Generate real-time monitoring template
+```
+
+#### Export Reports
+```bash
+aws-lambda-tuner export RESULTS-FILE [OPTIONS]
+  --format              Export format: pdf, excel, json, csv, html (default: pdf)
+  --workload-type, -w   Workload type for specialized export (default: generic)
+  --output, -o          Output file path (optional)
+```
+
+#### Cost Explorer Integration
+```bash
+aws-lambda-tuner cost-explorer FUNCTION-ARN [OPTIONS]
+  --days                Number of days to analyze (default: 7)
+  --output-dir, -o      Output directory (default: ./cost-explorer)
+```
+
+#### List Templates
+```bash
+aws-lambda-tuner templates
 ```
 
 ## 📊 Report Examples
@@ -370,10 +451,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- 🐛 [Report bugs](https://github.com/kencytbb/aws-lambda-tunner/issues)
-- 💡 [Request features](https://github.com/kencytbb/aws-lambda-tunner/issues)
-- 📖 [Documentation](https://github.com/kencytbb/aws-lambda-tunner/wiki)
-- 💬 [Discussions](https://github.com/kencytbb/aws-lambda-tunner/discussions)
+- 🐛 [Report bugs](https://github.com/kencytbb/aws-lambda-tuner/issues)
+- 💡 [Request features](https://github.com/kencytbb/aws-lambda-tuner/issues)
+- 📖 [Documentation](https://github.com/kencytbb/aws-lambda-tuner/wiki)
+- 💬 [Discussions](https://github.com/kencytbb/aws-lambda-tuner/discussions)
 
 ---
 
