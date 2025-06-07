@@ -94,7 +94,7 @@ aws-lambda-tuner --version
 ~/Library/Python/3.11/bin/aws-lambda-tuner --version
 
 # Or run as Python module
-python -m aws_lambda_tuner.cli --version
+python3 -m aws_lambda_tuner.cli --version
 ```
 
 **Note**: If you see "command not found", the CLI script is installed in your Python user directory. Add `~/Library/Python/3.11/bin` to your PATH or use the full path as shown above.
