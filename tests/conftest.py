@@ -11,6 +11,18 @@ import boto3
 from moto import mock_lambda
 
 from aws_lambda_tuner import TunerConfig
+from aws_lambda_tuner.models import MemoryTestResult, PerformanceAnalysis, Recommendation
+
+# Import our test utilities
+from tests.utils.mock_aws import MockAWSProvider, patch_boto3_with_mock
+from tests.utils.test_data_generators import TestDataGenerator
+from tests.utils.fixtures import (
+    create_test_config,
+    create_test_results,
+    create_test_analysis,
+    create_test_recommendation,
+    create_complete_test_results
+)
 
 
 @pytest.fixture
@@ -170,3 +182,128 @@ def mock_visualization_backend(monkeypatch):
     """Mock matplotlib to avoid GUI issues in tests."""
     import matplotlib
     monkeypatch.setattr(matplotlib, 'use', lambda backend: None)
+
+
+# New enhanced fixtures using our test utilities
+
+@pytest.fixture
+def mock_aws_provider():
+    """Provide a comprehensive mock AWS provider."""
+    return MockAWSProvider()
+
+
+@pytest.fixture
+def mock_aws_services(monkeypatch, mock_aws_provider):
+    """Mock all AWS services using our provider."""
+    patch_boto3_with_mock(monkeypatch, mock_aws_provider)
+    return mock_aws_provider
+
+
+@pytest.fixture
+def test_data_generator():
+    """Provide a test data generator with fixed seed for reproducible tests."""
+    return TestDataGenerator(seed=42)
+
+
+@pytest.fixture
+def enhanced_test_config():
+    """Enhanced test configuration fixture."""
+    return create_test_config()
+
+
+@pytest.fixture
+def sample_memory_results():
+    """Sample memory test results for testing."""
+    return {
+        256: MemoryTestResult(
+            memory_size=256,
+            iterations=5,
+            avg_duration=180.5,
+            p95_duration=200.0,
+            p99_duration=220.0,
+            avg_cost=0.00000834,
+            total_cost=0.00004170,
+            cold_starts=1,
+            errors=0
+        ),
+        512: MemoryTestResult(
+            memory_size=512,
+            iterations=5,
+            avg_duration=120.3,
+            p95_duration=140.0,
+            p99_duration=150.0,
+            avg_cost=0.00001125,
+            total_cost=0.00005625,
+            cold_starts=1,
+            errors=0
+        ),
+        1024: MemoryTestResult(
+            memory_size=1024,
+            iterations=5,
+            avg_duration=95.7,
+            p95_duration=110.0,
+            p99_duration=115.0,
+            avg_cost=0.00001668,
+            total_cost=0.00008340,
+            cold_starts=1,
+            errors=0
+        )
+    }
+
+
+@pytest.fixture
+def sample_performance_analysis(sample_memory_results):
+    """Sample performance analysis for testing."""
+    return create_test_analysis(sample_memory_results)
+
+
+@pytest.fixture
+def sample_recommendation():
+    """Sample recommendation for testing."""
+    return create_test_recommendation()
+
+
+@pytest.fixture
+def complete_tuning_results():
+    """Complete tuning results for integration testing."""
+    return create_complete_test_results()
+
+
+@pytest.fixture(params=['cpu_intensive', 'io_bound', 'memory_intensive', 'balanced'])
+def workload_type(request):
+    """Parametrized fixture for different workload types."""
+    return request.param
+
+
+@pytest.fixture(params=[128, 256, 512, 1024, 2048, 3008])
+def memory_size(request):
+    """Parametrized fixture for different memory sizes."""
+    return request.param
+
+
+@pytest.fixture(params=['cost', 'speed', 'balanced', 'comprehensive'])
+def strategy(request):
+    """Parametrized fixture for different optimization strategies."""
+    return request.param
+
+
+@pytest.fixture
+def aws_credentials_env(monkeypatch):
+    """Set up AWS credentials in environment for testing."""
+    monkeypatch.setenv('AWS_ACCESS_KEY_ID', 'testing')
+    monkeypatch.setenv('AWS_SECRET_ACCESS_KEY', 'testing')
+    monkeypatch.setenv('AWS_SECURITY_TOKEN', 'testing')
+    monkeypatch.setenv('AWS_SESSION_TOKEN', 'testing')
+    monkeypatch.setenv('AWS_DEFAULT_REGION', 'us-east-1')
+
+
+@pytest.fixture
+def disable_aws_retry(monkeypatch):
+    """Disable AWS retry for faster test execution."""
+    import botocore.config
+    config = botocore.config.Config(
+        retries={'max_attempts': 1},
+        connect_timeout=1,
+        read_timeout=1
+    )
+    monkeypatch.setattr('botocore.config.Config', lambda **kwargs: config)

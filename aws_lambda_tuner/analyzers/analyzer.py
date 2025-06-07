@@ -2,9 +2,15 @@
 
 import logging
 import statistics
+from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any
+import numpy as np
 
-from ..models import MemoryTestResult, Recommendation, PerformanceAnalysis
+from ..models import (
+    MemoryTestResult, Recommendation, PerformanceAnalysis,
+    ColdStartAnalysis, ConcurrencyAnalysis, ConcurrencyPattern, WorkloadAnalysis,
+    TimeBasedTrend, AdvancedPerformanceAnalysis
+)
 
 logger = logging.getLogger(__name__)
 
@@ -333,3 +339,619 @@ class PerformanceAnalyzer:
     def _find_cost_efficiency_point(self, sorted_results):
         """Find the most cost-efficient memory configuration."""
         return None  # Simplified for this implementation
+    
+    def analyze_cold_starts(self, memory_results: Dict[int, MemoryTestResult]) -> ColdStartAnalysis:
+        """Analyze cold start patterns and impact on performance."""
+        logger.info("Analyzing cold start patterns...")
+        
+        total_invocations = sum(result.iterations for result in memory_results.values())
+        total_cold_starts = sum(result.cold_starts for result in memory_results.values())
+        
+        # Calculate overall cold start ratio
+        cold_start_ratio = total_cold_starts / total_invocations if total_invocations > 0 else 0
+        
+        # Analyze durations for cold vs warm starts
+        cold_start_durations = []
+        warm_start_durations = []
+        memory_cold_start_ratios = {}
+        
+        for memory_size, result in memory_results.items():
+            memory_cold_start_ratios[memory_size] = result.cold_starts / result.iterations if result.iterations > 0 else 0
+            
+            # Extract cold start and warm start durations from raw results
+            for raw_result in result.raw_results:
+                if raw_result.get('is_cold_start', False):
+                    cold_start_durations.append(raw_result['duration'])
+                else:
+                    warm_start_durations.append(raw_result['duration'])
+        
+        avg_cold_start_duration = statistics.mean(cold_start_durations) if cold_start_durations else 0
+        avg_warm_start_duration = statistics.mean(warm_start_durations) if warm_start_durations else 0
+        
+        # Calculate cold start impact score
+        if avg_warm_start_duration > 0:
+            cold_start_impact_score = (avg_cold_start_duration - avg_warm_start_duration) / avg_warm_start_duration
+        else:
+            cold_start_impact_score = 0
+        
+        # Find correlation between memory and cold start frequency
+        memory_sizes = list(memory_cold_start_ratios.keys())
+        cold_start_ratios = list(memory_cold_start_ratios.values())
+        memory_vs_cold_start_correlation = self._calculate_correlation(memory_sizes, cold_start_ratios)
+        
+        # Find optimal memory for reducing cold starts
+        optimal_memory_for_cold_starts = min(memory_cold_start_ratios, key=memory_cold_start_ratios.get)
+        
+        # Identify patterns
+        cold_start_patterns = {
+            'memory_impact': {
+                'high_memory_reduces_cold_starts': memory_vs_cold_start_correlation < -0.3,
+                'memory_size_threshold': self._find_cold_start_threshold(memory_cold_start_ratios)
+            },
+            'frequency_analysis': {
+                'frequent_cold_starts': cold_start_ratio > 0.3,
+                'memory_distribution': memory_cold_start_ratios
+            }
+        }
+        
+        return ColdStartAnalysis(
+            cold_start_ratio=cold_start_ratio,
+            avg_cold_start_duration=avg_cold_start_duration,
+            avg_warm_start_duration=avg_warm_start_duration,
+            cold_start_impact_score=cold_start_impact_score,
+            memory_vs_cold_start_correlation=memory_vs_cold_start_correlation,
+            optimal_memory_for_cold_starts=optimal_memory_for_cold_starts,
+            cold_start_patterns=cold_start_patterns
+        )
+    
+    def analyze_concurrency_patterns(self, memory_results: Dict[int, MemoryTestResult]) -> ConcurrencyAnalysis:
+        """Analyze concurrency utilization and scaling patterns."""
+        logger.info("Analyzing concurrency patterns...")
+        
+        # Extract concurrency data from raw results
+        concurrent_executions = []
+        throttling_events = 0
+        execution_timestamps = []
+        
+        for result in memory_results.values():
+            for raw_result in result.raw_results:
+                if 'concurrent_executions' in raw_result:
+                    concurrent_executions.append(raw_result['concurrent_executions'])
+                if 'timestamp' in raw_result:
+                    execution_timestamps.append(raw_result['timestamp'])
+                if raw_result.get('throttled', False):
+                    throttling_events += 1
+        
+        # Calculate concurrency metrics
+        avg_concurrent_executions = statistics.mean(concurrent_executions) if concurrent_executions else 0
+        peak_concurrent_executions = max(concurrent_executions) if concurrent_executions else 0
+        
+        # Calculate utilization based on AWS Lambda concurrent execution limits
+        default_concurrent_limit = 1000  # AWS default
+        concurrency_utilization = peak_concurrent_executions / default_concurrent_limit if default_concurrent_limit > 0 else 0
+        
+        # Analyze scaling efficiency
+        scaling_efficiency = self._calculate_scaling_efficiency(concurrent_executions)
+        
+        # Recommend optimal concurrency limit
+        recommended_concurrency_limit = self._recommend_concurrency_limit(concurrent_executions, throttling_events)
+        
+        # Identify specific concurrency patterns
+        identified_patterns = self._identify_concurrency_patterns(concurrent_executions, execution_timestamps)
+        
+        # Identify patterns
+        concurrency_patterns = {
+            'burst_behavior': self._analyze_burst_patterns(concurrent_executions),
+            'scaling_latency': self._analyze_scaling_latency(memory_results),
+            'resource_contention': throttling_events > 0,
+            'pattern_summary': self._summarize_concurrency_patterns(identified_patterns)
+        }
+        
+        return ConcurrencyAnalysis(
+            avg_concurrent_executions=avg_concurrent_executions,
+            peak_concurrent_executions=peak_concurrent_executions,
+            concurrency_utilization=concurrency_utilization,
+            scaling_efficiency=scaling_efficiency,
+            throttling_events=throttling_events,
+            recommended_concurrency_limit=recommended_concurrency_limit,
+            concurrency_patterns=concurrency_patterns,
+            identified_patterns=identified_patterns
+        )
+    
+    def analyze_workload_specific_patterns(self, memory_results: Dict[int, MemoryTestResult], 
+                                         workload_type: str) -> WorkloadAnalysis:
+        """Perform workload-specific optimization analysis."""
+        logger.info(f"Analyzing workload-specific patterns for type: {workload_type}")
+        
+        # Calculate resource utilization
+        resource_utilization = self._calculate_resource_utilization(memory_results)
+        
+        # Identify optimization opportunities based on workload type
+        optimization_opportunities = self._identify_optimization_opportunities(memory_results, workload_type)
+        
+        # Generate workload-specific recommendations
+        workload_specific_recommendations = self._generate_workload_recommendations(memory_results, workload_type)
+        
+        # Create cost vs performance curve
+        cost_vs_performance_curve = self._create_cost_performance_curve(memory_results)
+        
+        return WorkloadAnalysis(
+            workload_type=workload_type,
+            resource_utilization=resource_utilization,
+            optimization_opportunities=optimization_opportunities,
+            workload_specific_recommendations=workload_specific_recommendations,
+            cost_vs_performance_curve=cost_vs_performance_curve
+        )
+    
+    def analyze_time_based_trends(self, memory_results: Dict[int, MemoryTestResult], 
+                                 historical_data: Optional[List[Dict[str, Any]]] = None) -> List[TimeBasedTrend]:
+        """Analyze time-based performance trends and patterns."""
+        logger.info("Analyzing time-based performance trends...")
+        
+        trends = []
+        
+        # Current session trend analysis
+        current_trend = self._analyze_current_session_trends(memory_results)
+        trends.append(current_trend)
+        
+        # Historical trend analysis if data is available
+        if historical_data:
+            historical_trends = self._analyze_historical_trends(historical_data)
+            trends.extend(historical_trends)
+        
+        return trends
+    
+    def perform_advanced_analysis(self, memory_results: Dict[int, MemoryTestResult], 
+                                baseline_results: Optional[List[Dict[str, Any]]] = None,
+                                workload_type: str = "general",
+                                historical_data: Optional[List[Dict[str, Any]]] = None) -> AdvancedPerformanceAnalysis:
+        """Perform comprehensive advanced analysis including all new features."""
+        logger.info("Performing advanced performance analysis...")
+        
+        # Perform base analysis
+        base_analysis = self.analyze(memory_results, baseline_results)
+        
+        # Perform advanced analyses
+        cold_start_analysis = self.analyze_cold_starts(memory_results)
+        concurrency_analysis = self.analyze_concurrency_patterns(memory_results)
+        workload_analysis = self.analyze_workload_specific_patterns(memory_results, workload_type)
+        time_based_trends = self.analyze_time_based_trends(memory_results, historical_data)
+        
+        return AdvancedPerformanceAnalysis(
+            memory_results=base_analysis.memory_results,
+            efficiency_scores=base_analysis.efficiency_scores,
+            cost_optimal=base_analysis.cost_optimal,
+            speed_optimal=base_analysis.speed_optimal,
+            balanced_optimal=base_analysis.balanced_optimal,
+            trends=base_analysis.trends,
+            insights=base_analysis.insights,
+            baseline_comparison=base_analysis.baseline_comparison,
+            cold_start_analysis=cold_start_analysis,
+            concurrency_analysis=concurrency_analysis,
+            workload_analysis=workload_analysis,
+            time_based_trends=time_based_trends
+        )
+    
+    # Helper methods for advanced analysis
+    
+    def _calculate_correlation(self, x_values: List[float], y_values: List[float]) -> float:
+        """Calculate correlation coefficient between two variables."""
+        if len(x_values) != len(y_values) or len(x_values) < 2:
+            return 0.0
+        
+        try:
+            return float(np.corrcoef(x_values, y_values)[0, 1])
+        except Exception:
+            return 0.0
+    
+    def _find_cold_start_threshold(self, memory_cold_start_ratios: Dict[int, float]) -> Optional[int]:
+        """Find the memory threshold where cold starts significantly decrease."""
+        sorted_items = sorted(memory_cold_start_ratios.items())
+        
+        for i in range(1, len(sorted_items)):
+            current_ratio = sorted_items[i][1]
+            previous_ratio = sorted_items[i-1][1]
+            
+            # If cold start ratio decreases by more than 20%
+            if previous_ratio > 0 and (previous_ratio - current_ratio) / previous_ratio > 0.2:
+                return sorted_items[i][0]
+        
+        return None
+    
+    def _calculate_scaling_efficiency(self, concurrent_executions: List[int]) -> float:
+        """Calculate how efficiently the function scales with concurrency."""
+        if len(concurrent_executions) < 2:
+            return 1.0
+        
+        # Calculate the coefficient of variation (stability metric)
+        mean_concurrency = statistics.mean(concurrent_executions)
+        std_concurrency = statistics.stdev(concurrent_executions)
+        
+        if mean_concurrency == 0:
+            return 0.0
+        
+        cv = std_concurrency / mean_concurrency
+        # Convert to efficiency score (lower CV = higher efficiency)
+        return max(0, 1 - cv)
+    
+    def _recommend_concurrency_limit(self, concurrent_executions: List[int], throttling_events: int) -> Optional[int]:
+        """Recommend optimal concurrency limit based on usage patterns."""
+        if not concurrent_executions:
+            return None
+        
+        peak_concurrency = max(concurrent_executions)
+        avg_concurrency = statistics.mean(concurrent_executions)
+        
+        # If no throttling, allow for some headroom
+        if throttling_events == 0:
+            return int(peak_concurrency * 1.2)
+        
+        # If throttling occurred, recommend based on average usage
+        return int(avg_concurrency * 1.5)
+    
+    def _analyze_burst_patterns(self, concurrent_executions: List[int]) -> Dict[str, Any]:
+        """Analyze burst traffic patterns."""
+        if not concurrent_executions:
+            return {"burst_detected": False}
+        
+        mean_concurrency = statistics.mean(concurrent_executions)
+        peak_concurrency = max(concurrent_executions)
+        
+        # Detect burst if peak is significantly higher than average
+        burst_ratio = peak_concurrency / mean_concurrency if mean_concurrency > 0 else 0
+        burst_detected = burst_ratio > 3.0
+        
+        return {
+            "burst_detected": burst_detected,
+            "burst_ratio": burst_ratio,
+            "peak_concurrency": peak_concurrency,
+            "average_concurrency": mean_concurrency
+        }
+    
+    def _analyze_scaling_latency(self, memory_results: Dict[int, MemoryTestResult]) -> Dict[str, Any]:
+        """Analyze how quickly the function scales up."""
+        # This would typically analyze timestamps of invocations
+        # For now, return basic metrics
+        return {
+            "scaling_analysis": "requires_timestamp_data",
+            "recommendation": "monitor_scaling_metrics"
+        }
+    
+    def _calculate_resource_utilization(self, memory_results: Dict[int, MemoryTestResult]) -> Dict[str, float]:
+        """Calculate resource utilization metrics."""
+        # Extract CPU and memory utilization from raw results if available
+        cpu_utilizations = []
+        memory_utilizations = []
+        
+        for result in memory_results.values():
+            for raw_result in result.raw_results:
+                if 'cpu_utilization' in raw_result:
+                    cpu_utilizations.append(raw_result['cpu_utilization'])
+                if 'memory_utilization' in raw_result:
+                    memory_utilizations.append(raw_result['memory_utilization'])
+        
+        return {
+            'avg_cpu_utilization': statistics.mean(cpu_utilizations) if cpu_utilizations else 0.0,
+            'avg_memory_utilization': statistics.mean(memory_utilizations) if memory_utilizations else 0.0,
+            'peak_cpu_utilization': max(cpu_utilizations) if cpu_utilizations else 0.0,
+            'peak_memory_utilization': max(memory_utilizations) if memory_utilizations else 0.0
+        }
+    
+    def _identify_optimization_opportunities(self, memory_results: Dict[int, MemoryTestResult], 
+                                           workload_type: str) -> List[Dict[str, Any]]:
+        """Identify workload-specific optimization opportunities."""
+        opportunities = []
+        
+        # Analyze based on workload type
+        if workload_type == "cpu_intensive":
+            opportunities.extend(self._cpu_intensive_optimizations(memory_results))
+        elif workload_type == "memory_intensive":
+            opportunities.extend(self._memory_intensive_optimizations(memory_results))
+        elif workload_type == "io_intensive":
+            opportunities.extend(self._io_intensive_optimizations(memory_results))
+        
+        # Common optimizations
+        opportunities.extend(self._common_optimizations(memory_results))
+        
+        return opportunities
+    
+    def _cpu_intensive_optimizations(self, memory_results: Dict[int, MemoryTestResult]) -> List[Dict[str, Any]]:
+        """Identify optimizations for CPU-intensive workloads."""
+        opportunities = []
+        
+        # Check if higher memory significantly improves performance
+        sorted_results = sorted(memory_results.items())
+        if len(sorted_results) >= 2:
+            lowest_memory = sorted_results[0][1]
+            highest_memory = sorted_results[-1][1]
+            
+            performance_improvement = (lowest_memory.avg_duration - highest_memory.avg_duration) / lowest_memory.avg_duration
+            
+            if performance_improvement > 0.3:  # 30% improvement
+                opportunities.append({
+                    "type": "memory_scaling",
+                    "description": "Significant performance gains with higher memory allocation",
+                    "impact": "high",
+                    "recommendation": "Consider allocating more memory to improve CPU performance"
+                })
+        
+        return opportunities
+    
+    def _memory_intensive_optimizations(self, memory_results: Dict[int, MemoryTestResult]) -> List[Dict[str, Any]]:
+        """Identify optimizations for memory-intensive workloads."""
+        return [
+            {
+                "type": "memory_efficiency",
+                "description": "Monitor memory utilization patterns",
+                "impact": "medium",
+                "recommendation": "Optimize memory allocation based on actual usage"
+            }
+        ]
+    
+    def _io_intensive_optimizations(self, memory_results: Dict[int, MemoryTestResult]) -> List[Dict[str, Any]]:
+        """Identify optimizations for I/O-intensive workloads."""
+        return [
+            {
+                "type": "connection_pooling",
+                "description": "Consider connection pooling for I/O operations",
+                "impact": "medium",
+                "recommendation": "Implement connection reuse to reduce I/O overhead"
+            }
+        ]
+    
+    def _common_optimizations(self, memory_results: Dict[int, MemoryTestResult]) -> List[Dict[str, Any]]:
+        """Identify common optimization opportunities."""
+        opportunities = []
+        
+        # Check for high error rates
+        total_errors = sum(result.errors for result in memory_results.values())
+        total_iterations = sum(result.iterations for result in memory_results.values())
+        error_rate = total_errors / total_iterations if total_iterations > 0 else 0
+        
+        if error_rate > 0.05:  # 5% error rate
+            opportunities.append({
+                "type": "error_reduction",
+                "description": f"High error rate detected: {error_rate:.2%}",
+                "impact": "high",
+                "recommendation": "Investigate and fix causes of function errors"
+            })
+        
+        return opportunities
+    
+    def _generate_workload_recommendations(self, memory_results: Dict[int, MemoryTestResult], 
+                                         workload_type: str) -> List[Dict[str, Any]]:
+        """Generate workload-specific recommendations."""
+        recommendations = []
+        
+        if workload_type == "on_demand":
+            recommendations.append({
+                "type": "provisioned_concurrency",
+                "priority": "high",
+                "description": "Consider provisioned concurrency to reduce cold starts",
+                "rationale": "On-demand workloads benefit from reduced latency"
+            })
+        elif workload_type == "continuous":
+            recommendations.append({
+                "type": "memory_optimization",
+                "priority": "medium",
+                "description": "Optimize for cost efficiency in continuous workloads",
+                "rationale": "Long-running workloads should prioritize cost optimization"
+            })
+        elif workload_type == "scheduled":
+            recommendations.append({
+                "type": "balanced_approach",
+                "priority": "medium",
+                "description": "Balance cost and performance for scheduled workloads",
+                "rationale": "Predictable workloads allow for balanced optimization"
+            })
+        
+        return recommendations
+    
+    def _create_cost_performance_curve(self, memory_results: Dict[int, MemoryTestResult]) -> Dict[str, Any]:
+        """Create cost vs performance curve data."""
+        sorted_results = sorted(memory_results.items())
+        
+        memory_sizes = [item[0] for item in sorted_results]
+        costs = [item[1].avg_cost for item in sorted_results]
+        durations = [item[1].avg_duration for item in sorted_results]
+        
+        return {
+            "memory_sizes": memory_sizes,
+            "costs": costs,
+            "durations": durations,
+            "efficiency_frontier": self._calculate_efficiency_frontier(costs, durations)
+        }
+    
+    def _calculate_efficiency_frontier(self, costs: List[float], durations: List[float]) -> List[int]:
+        """Calculate the efficiency frontier (Pareto optimal points)."""
+        # Find points that are not dominated by any other point
+        frontier_indices = []
+        
+        for i, (cost_i, duration_i) in enumerate(zip(costs, durations)):
+            is_dominated = False
+            for j, (cost_j, duration_j) in enumerate(zip(costs, durations)):
+                if i != j and cost_j <= cost_i and duration_j <= duration_i and (cost_j < cost_i or duration_j < duration_i):
+                    is_dominated = True
+                    break
+            
+            if not is_dominated:
+                frontier_indices.append(i)
+        
+        return frontier_indices
+    
+    def _analyze_current_session_trends(self, memory_results: Dict[int, MemoryTestResult]) -> TimeBasedTrend:
+        """Analyze trends within the current testing session."""
+        # Extract timing data from raw results
+        execution_times = []
+        for result in memory_results.values():
+            for raw_result in result.raw_results:
+                if 'timestamp' in raw_result:
+                    execution_times.append(raw_result['timestamp'])
+        
+        # Basic trend analysis
+        metric_trends = {
+            "duration": [result.avg_duration for result in memory_results.values()],
+            "cost": [result.avg_cost for result in memory_results.values()]
+        }
+        
+        return TimeBasedTrend(
+            time_period="current_session",
+            metric_trends=metric_trends,
+            seasonal_patterns={},
+            performance_degradation=False,
+            trend_confidence=0.8,
+            forecast={}
+        )
+    
+    def _analyze_historical_trends(self, historical_data: List[Dict[str, Any]]) -> List[TimeBasedTrend]:
+        """Analyze historical performance trends."""
+        # This would analyze historical data for long-term trends
+        # For now, return a placeholder
+        return [
+            TimeBasedTrend(
+                time_period="historical",
+                metric_trends={},
+                seasonal_patterns={},
+                performance_degradation=False,
+                trend_confidence=0.5,
+                forecast={}
+            )
+        ]
+    
+    def _identify_concurrency_patterns(self, concurrent_executions: List[int], 
+                                     execution_timestamps: List[float]) -> List[ConcurrencyPattern]:
+        """Identify specific concurrency patterns from execution data."""
+        patterns = []
+        
+        if not concurrent_executions or len(concurrent_executions) < 5:
+            return patterns
+        
+        # Calculate basic statistics
+        mean_concurrency = statistics.mean(concurrent_executions)
+        std_concurrency = statistics.stdev(concurrent_executions) if len(concurrent_executions) > 1 else 0
+        max_concurrency = max(concurrent_executions)
+        
+        # Identify burst pattern
+        burst_threshold = mean_concurrency + (2 * std_concurrency)
+        burst_count = sum(1 for c in concurrent_executions if c > burst_threshold)
+        if burst_count > 0:
+            burst_frequency = burst_count / len(concurrent_executions)
+            patterns.append(ConcurrencyPattern(
+                pattern_type="burst",
+                frequency=burst_frequency,
+                intensity=(max_concurrency - mean_concurrency) / mean_concurrency if mean_concurrency > 0 else 0,
+                duration_ms=self._estimate_pattern_duration(concurrent_executions, burst_threshold),
+                impact_on_performance=self._calculate_pattern_impact(concurrent_executions, burst_threshold),
+                recommendations=[
+                    "Consider provisioned concurrency for burst workloads",
+                    "Monitor scaling behavior during bursts",
+                    "Implement backpressure mechanisms if needed"
+                ]
+            ))
+        
+        # Identify steady pattern
+        cv = std_concurrency / mean_concurrency if mean_concurrency > 0 else 0
+        if cv < 0.3:  # Low coefficient of variation indicates steady pattern
+            patterns.append(ConcurrencyPattern(
+                pattern_type="steady",
+                frequency=1.0 - cv,  # Higher frequency for lower variation
+                intensity=mean_concurrency / max_concurrency if max_concurrency > 0 else 0,
+                duration_ms=len(concurrent_executions) * 1000,  # Approximate total duration
+                impact_on_performance=0.1,  # Steady patterns have low impact
+                recommendations=[
+                    "Optimize for cost efficiency with steady workloads",
+                    "Consider reserved concurrency for predictable load",
+                    "Focus on memory optimization over concurrency tuning"
+                ]
+            ))
+        
+        # Identify gradual ramp pattern
+        if len(concurrent_executions) >= 10:
+            # Check for gradual increase over time
+            first_half = concurrent_executions[:len(concurrent_executions)//2]
+            second_half = concurrent_executions[len(concurrent_executions)//2:]
+            first_half_avg = statistics.mean(first_half)
+            second_half_avg = statistics.mean(second_half)
+            
+            if second_half_avg > first_half_avg * 1.5:  # 50% increase
+                patterns.append(ConcurrencyPattern(
+                    pattern_type="gradual_ramp",
+                    frequency=0.5,  # Moderate frequency
+                    intensity=(second_half_avg - first_half_avg) / first_half_avg if first_half_avg > 0 else 0,
+                    duration_ms=len(concurrent_executions) * 500,  # Approximate ramp duration
+                    impact_on_performance=0.3,  # Moderate impact
+                    recommendations=[
+                        "Monitor scaling latency during ramp-up periods",
+                        "Consider gradual warm-up strategies",
+                        "Implement predictive scaling if pattern is regular"
+                    ]
+                ))
+        
+        # Identify spike pattern
+        spike_threshold = mean_concurrency + (3 * std_concurrency)
+        spike_count = sum(1 for c in concurrent_executions if c > spike_threshold)
+        if spike_count > 0 and spike_count < len(concurrent_executions) * 0.1:  # Less than 10% of samples
+            spike_frequency = spike_count / len(concurrent_executions)
+            patterns.append(ConcurrencyPattern(
+                pattern_type="spike",
+                frequency=spike_frequency,
+                intensity=max_concurrency / mean_concurrency if mean_concurrency > 0 else 0,
+                duration_ms=spike_count * 100,  # Estimated spike duration
+                impact_on_performance=0.7,  # High impact
+                recommendations=[
+                    "Implement circuit breakers for spike protection",
+                    "Consider auto-scaling policies with aggressive scaling",
+                    "Monitor error rates during spikes",
+                    "Implement queue-based processing for spike handling"
+                ]
+            ))
+        
+        return patterns
+    
+    def _estimate_pattern_duration(self, concurrent_executions: List[int], threshold: float) -> float:
+        """Estimate the duration of a pattern above threshold."""
+        # Simple estimation - count consecutive periods above threshold
+        consecutive_count = 0
+        max_consecutive = 0
+        
+        for execution in concurrent_executions:
+            if execution > threshold:
+                consecutive_count += 1
+                max_consecutive = max(max_consecutive, consecutive_count)
+            else:
+                consecutive_count = 0
+        
+        # Estimate duration (assuming each sample represents ~100ms)
+        return max_consecutive * 100
+    
+    def _calculate_pattern_impact(self, concurrent_executions: List[int], threshold: float) -> float:
+        """Calculate the performance impact of a pattern."""
+        above_threshold_count = sum(1 for c in concurrent_executions if c > threshold)
+        total_count = len(concurrent_executions)
+        
+        if total_count == 0:
+            return 0.0
+        
+        # Impact score based on frequency and magnitude
+        frequency_impact = above_threshold_count / total_count
+        magnitude_impact = max(concurrent_executions) / statistics.mean(concurrent_executions) if statistics.mean(concurrent_executions) > 0 else 0
+        
+        return min(1.0, (frequency_impact + magnitude_impact) / 2)
+    
+    def _summarize_concurrency_patterns(self, patterns: List[ConcurrencyPattern]) -> Dict[str, Any]:
+        """Summarize identified concurrency patterns."""
+        if not patterns:
+            return {"dominant_pattern": "unknown", "pattern_count": 0, "high_impact_patterns": []}
+        
+        # Find dominant pattern (highest frequency * impact)
+        dominant_pattern = max(patterns, key=lambda p: p.frequency * p.impact_on_performance)
+        
+        # Find high impact patterns
+        high_impact_patterns = [p.pattern_type for p in patterns if p.impact_on_performance > 0.5]
+        
+        return {
+            "dominant_pattern": dominant_pattern.pattern_type,
+            "pattern_count": len(patterns),
+            "high_impact_patterns": high_impact_patterns,
+            "total_recommendations": sum(len(p.recommendations) for p in patterns)
+        }
