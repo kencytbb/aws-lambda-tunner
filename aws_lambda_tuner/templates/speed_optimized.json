@@ -1,0 +1,12 @@
+{
+  "function_arn": "",
+  "payload": "{}",
+  "memory_sizes": [1024, 1536, 2048, 3008],
+  "iterations": 20,
+  "strategy": "speed",
+  "concurrent_executions": 10,
+  "timeout": 300,
+  "warmup_runs": 3,
+  "output_dir": "./tuning-results",
+  "dry_run": false
+}
