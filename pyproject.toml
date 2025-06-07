@@ -1,0 +1,106 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aws-lambda-tuner"
+version = "1.0.0"
+description = "A comprehensive tool for optimizing AWS Lambda functions for cost and performance"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "AWS Lambda Tuner Contributors", email = "support@lambdatuner.com"}
+]
+keywords = ["aws", "lambda", "performance", "optimization", "tuning", "serverless"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Monitoring",
+    "Topic :: System :: Distributed Computing"
+]
+
+dependencies = [
+    "boto3>=1.28.0",
+    "click>=8.1.0",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+    "numpy>=1.24.0",
+    "pandas>=2.0.0",
+    "rich>=13.5.0",
+    "pydantic>=2.0.0",
+    "aiofiles>=23.1.0",
+    "asyncio>=3.4.3",
+    "jinja2>=3.1.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.7.0",
+    "flake8>=6.1.0",
+    "mypy>=1.5.0"
+]
+
+[project.urls]
+Homepage = "https://github.com/kencytbb/aws-lambda-tunner"
+Documentation = "https://github.com/kencytbb/aws-lambda-tunner/wiki"
+Repository = "https://github.com/kencytbb/aws-lambda-tunner"
+Issues = "https://github.com/kencytbb/aws-lambda-tunner/issues"
+
+[project.scripts]
+aws-lambda-tuner = "aws_lambda_tuner.cli:main"
+lambda-tuner = "aws_lambda_tuner.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["aws_lambda_tuner*"]
+exclude = ["tests*", "docs*", "examples*"]
+
+[tool.setuptools.package-data]
+aws_lambda_tuner = ["templates/*.json"]
+
+[tool.black]
+line-length = 100
+target-version = ["py38", "py39", "py310", "py311"]
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+line_length = 100
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers"
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+
+[tool.coverage.run]
+source = ["aws_lambda_tuner"]
+omit = ["*/tests/*", "*/examples/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:"
+]
