@@ -78,17 +78,26 @@ Real-time monitoring with KPI tracking:
 # Install in development mode
 pip install -e .
 
-# Or install with dev dependencies
-pip install -e .[dev]
+# If CLI is not in PATH, add Python bin directory to PATH
+export PATH="$HOME/Library/Python/3.11/bin:$PATH"
 
-# Or install production dependencies only
-pip install -r requirements.txt
+# Or use the Make command for installation
+make install
 ```
 
 ### Verify Installation
 ```bash
+# Test version (if PATH is configured)
 aws-lambda-tuner --version
+
+# Or use full path if needed
+~/Library/Python/3.11/bin/aws-lambda-tuner --version
+
+# Or run as Python module
+python -m aws_lambda_tuner.cli --version
 ```
+
+**Note**: If you see "command not found", the CLI script is installed in your Python user directory. Add `~/Library/Python/3.11/bin` to your PATH or use the full path as shown above.
 
 ## 🚀 Quick Start
 
@@ -359,22 +368,27 @@ View our comprehensive report examples in the [`examples/reports/`](examples/rep
 
 ### Run Complete Test Suite
 ```bash
-# Run all tests with coverage
-pytest --cov=aws_lambda_tuner --cov-report=html
+# Using Make commands (recommended)
+make test              # Run all tests
+make coverage          # Run tests with coverage
+make lint              # Run linting checks
+
+# Or using pytest directly
+python -m pytest --cov=aws_lambda_tuner --cov-report=html
 
 # Run specific test categories
-pytest -m unit           # Unit tests only
-pytest -m integration    # Integration tests only
-pytest -m e2e            # End-to-end tests only
-pytest -m performance    # Performance tests only
+python -m pytest -m unit           # Unit tests only
+python -m pytest -m integration    # Integration tests only
+python -m pytest -m e2e            # End-to-end tests only
+python -m pytest -m performance    # Performance tests only
 ```
 
 ### Test Different Workload Types
 ```bash
 # Test workload-specific optimizations
-pytest -m workload_web_api
-pytest -m workload_batch_processing
-pytest -m workload_scheduled
+python -m pytest -m workload_web_api
+python -m pytest -m workload_batch_processing
+python -m pytest -m workload_scheduled
 ```
 
 ### Performance Benchmarking

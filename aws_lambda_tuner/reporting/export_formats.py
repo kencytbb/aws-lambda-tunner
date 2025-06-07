@@ -27,6 +27,9 @@ try:
     REPORTLAB_AVAILABLE = True
 except ImportError:
     REPORTLAB_AVAILABLE = False
+    # Create mock classes for type hints when reportlab is not available
+    class Drawing:
+        pass
 
 # Excel generation
 try:
@@ -38,6 +41,12 @@ try:
     EXCEL_AVAILABLE = True
 except ImportError:
     EXCEL_AVAILABLE = False
+    # Create mock classes for type hints when pandas/openpyxl is not available
+    class pd:
+        class ExcelWriter:
+            pass
+    class Workbook:
+        pass
 
 from ..utils import calculate_cost, calculate_statistics
 from ..exceptions import ReportGenerationError

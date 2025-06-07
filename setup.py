@@ -3,8 +3,24 @@ from setuptools import setup, find_packages
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-with open("requirements.txt", "r", encoding="utf-8") as fh:
-    requirements = [line.strip() for line in fh if line.strip() and not line.startswith("#")]
+requirements = [
+    "boto3>=1.28.0",
+    "click>=8.1.0",
+    "tabulate>=0.9.0",
+    "jinja2>=3.1.0",
+    "pyyaml>=6.0",
+    "colorama>=0.4.0",
+    "rich>=13.5.0",
+    "tqdm>=4.65.0",
+    "numpy>=1.24.0",
+    "pandas>=1.5.0",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+    "plotly>=5.0.0",
+    "aiohttp>=3.8.0",
+    "asyncio-throttle>=1.0.0",
+    "scikit-learn>=1.3.0"
+]
 
 setup(
     name="aws-lambda-tuner",
