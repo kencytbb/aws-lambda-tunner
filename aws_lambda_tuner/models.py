@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Any
 @dataclass
 class MemoryTestResult:
     """Results from testing a specific memory configuration."""
+
     memory_size: int
     iterations: int
     avg_duration: float
@@ -23,6 +24,7 @@ class MemoryTestResult:
 @dataclass
 class Recommendation:
     """Optimization recommendation."""
+
     strategy: str
     current_memory_size: int
     optimal_memory_size: int
@@ -37,6 +39,7 @@ class Recommendation:
 @dataclass
 class PerformanceAnalysis:
     """Complete performance analysis results."""
+
     memory_results: Dict[int, MemoryTestResult]
     efficiency_scores: Dict[int, float]
     cost_optimal: Dict[str, Any]
@@ -50,6 +53,7 @@ class PerformanceAnalysis:
 @dataclass
 class ColdStartAnalysis:
     """Analysis results for cold start patterns."""
+
     cold_start_ratio: float
     avg_cold_start_duration: float
     avg_warm_start_duration: float
@@ -62,6 +66,7 @@ class ColdStartAnalysis:
 @dataclass
 class ConcurrencyPattern:
     """Concurrency pattern analysis results."""
+
     pattern_type: str  # 'burst', 'steady', 'gradual_ramp', 'spike'
     frequency: float  # How often this pattern occurs
     intensity: float  # Magnitude of the pattern
@@ -73,6 +78,7 @@ class ConcurrencyPattern:
 @dataclass
 class ConcurrencyAnalysis:
     """Analysis results for concurrency patterns."""
+
     avg_concurrent_executions: float
     peak_concurrent_executions: int
     concurrency_utilization: float
@@ -86,6 +92,7 @@ class ConcurrencyAnalysis:
 @dataclass
 class WorkloadAnalysis:
     """Analysis results for workload-specific optimization."""
+
     workload_type: str
     resource_utilization: Dict[str, float]
     optimization_opportunities: List[Dict[str, Any]]
@@ -96,6 +103,7 @@ class WorkloadAnalysis:
 @dataclass
 class TimeBasedTrend:
     """Time-based performance trend analysis."""
+
     time_period: str
     metric_trends: Dict[str, List[float]]
     seasonal_patterns: Dict[str, Any]
@@ -107,6 +115,7 @@ class TimeBasedTrend:
 @dataclass
 class AdvancedPerformanceAnalysis:
     """Extended performance analysis with advanced metrics."""
+
     memory_results: Dict[int, MemoryTestResult]
     efficiency_scores: Dict[int, float]
     cost_optimal: Dict[str, Any]
@@ -124,6 +133,7 @@ class AdvancedPerformanceAnalysis:
 @dataclass
 class TuningResult:
     """Complete tuning session results."""
+
     function_arn: str
     timestamp: datetime
     strategy: str

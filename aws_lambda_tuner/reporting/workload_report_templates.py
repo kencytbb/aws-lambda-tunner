@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class WorkloadReportTemplates:
     """Templates for generating workload-specific reports."""
-    
+
     @staticmethod
     def get_web_api_html_template() -> str:
         """HTML template for web API workload reports."""
@@ -626,76 +626,71 @@ class WorkloadReportTemplates:
                 "workload_type": workload_type,
                 "report_version": "2.0",
                 "generated_at": None,
-                "tuner_version": "1.0.0"
+                "tuner_version": "1.0.0",
             },
-            "summary": {
-                "optimal_configuration": {},
-                "key_metrics": {},
-                "performance_summary": {}
-            },
+            "summary": {"optimal_configuration": {}, "key_metrics": {}, "performance_summary": {}},
             "detailed_analysis": {
                 "configurations": [],
                 "workload_specific_metrics": {},
-                "comparative_analysis": {}
+                "comparative_analysis": {},
             },
             "recommendations": {
                 "immediate_actions": [],
                 "optimization_opportunities": [],
                 "scaling_recommendations": [],
-                "cost_optimization": []
+                "cost_optimization": [],
             },
-            "visualizations": {
-                "charts_generated": [],
-                "dashboard_urls": []
-            }
+            "visualizations": {"charts_generated": [], "dashboard_urls": []},
         }
-        
+
         # Add workload-specific sections
         if workload_type == "web_api":
             base_template["detailed_analysis"]["latency_analysis"] = {}
             base_template["detailed_analysis"]["cold_start_impact"] = {}
             base_template["api_gateway_integration"] = {}
-            
+
         elif workload_type == "batch_processing":
             base_template["detailed_analysis"]["throughput_analysis"] = {}
             base_template["detailed_analysis"]["cost_efficiency"] = {}
             base_template["batch_optimization"] = {}
-            
+
         elif workload_type == "event_driven":
             base_template["detailed_analysis"]["event_processing_stats"] = {}
             base_template["detailed_analysis"]["reliability_metrics"] = {}
             base_template["event_source_configuration"] = {}
-            
+
         elif workload_type == "scheduled":
             base_template["detailed_analysis"]["execution_consistency"] = {}
             base_template["detailed_analysis"]["schedule_optimization"] = {}
             base_template["cron_recommendations"] = {}
-            
+
         elif workload_type == "stream_processing":
             base_template["detailed_analysis"]["stream_metrics"] = {}
             base_template["detailed_analysis"]["parallelization_analysis"] = {}
             base_template["stream_configuration"] = {}
-        
+
         return base_template
 
     @staticmethod
-    def format_workload_report(workload_analysis: Dict[str, Any], template_type: str = "html") -> str:
+    def format_workload_report(
+        workload_analysis: Dict[str, Any], template_type: str = "html"
+    ) -> str:
         """
         Format a workload analysis into a report using appropriate template.
-        
+
         Args:
             workload_analysis: Analysis results from report service
             template_type: "html" or "json"
-            
+
         Returns:
             Formatted report string
         """
         try:
-            workload_type = workload_analysis.get('workload_type', 'generic')
-            key_metrics = workload_analysis.get('key_metrics', {})
-            recommendations = workload_analysis.get('recommendations', [])
-            scaling_recs = workload_analysis.get('scaling_recommendations', [])
-            
+            workload_type = workload_analysis.get("workload_type", "generic")
+            key_metrics = workload_analysis.get("key_metrics", {})
+            recommendations = workload_analysis.get("recommendations", [])
+            scaling_recs = workload_analysis.get("scaling_recommendations", [])
+
             if template_type == "json":
                 template = WorkloadReportTemplates.get_workload_json_template(workload_type)
                 template["metadata"]["generated_at"] = datetime.now().isoformat()
@@ -704,10 +699,10 @@ class WorkloadReportTemplates:
                 template["recommendations"]["scaling_recommendations"] = scaling_recs
                 template["detailed_analysis"]["workload_specific_metrics"] = workload_analysis
                 return json.dumps(template, indent=2)
-            
+
             # HTML formatting
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            
+
             # Format recommendations
             rec_html = ""
             for rec in recommendations:
@@ -718,7 +713,7 @@ class WorkloadReportTemplates:
                     <p>{rec.get('description', '')}</p>
                 </div>
                 """
-            
+
             # Format scaling recommendations
             scaling_html = ""
             for scale_rec in scaling_recs:
@@ -728,76 +723,76 @@ class WorkloadReportTemplates:
                     <p>{scale_rec.get('recommendation', '')}</p>
                 </div>
                 """
-            
+
             if workload_type == "web_api":
                 template = WorkloadReportTemplates.get_web_api_html_template()
-                
+
                 # Format cold start section
                 cold_start_section = ""
-                if key_metrics.get('cold_start_percentage', 0) > 10:
+                if key_metrics.get("cold_start_percentage", 0) > 10:
                     cold_start_section = """
                     <div class="alert">
                         <h3>⚠️ Cold Start Alert</h3>
                         <p>High cold start rate detected. Consider implementing provisioned concurrency.</p>
                     </div>
                     """
-                
+
                 return template.format(
-                    optimal_memory=key_metrics.get('optimal_memory', 'N/A'),
-                    p95_latency=key_metrics.get('p95_latency', 0),
-                    p99_latency=key_metrics.get('p99_latency', 0),
-                    cold_start_percentage=key_metrics.get('cold_start_percentage', 0),
-                    cold_start_avg_penalty=key_metrics.get('cold_start_avg_penalty', 0),
+                    optimal_memory=key_metrics.get("optimal_memory", "N/A"),
+                    p95_latency=key_metrics.get("p95_latency", 0),
+                    p99_latency=key_metrics.get("p99_latency", 0),
+                    cold_start_percentage=key_metrics.get("cold_start_percentage", 0),
+                    cold_start_avg_penalty=key_metrics.get("cold_start_avg_penalty", 0),
                     latency_recommendation="Optimize for sub-100ms P95 latency",
                     cold_start_section=cold_start_section,
                     configuration_rows="<!-- Configuration data would be inserted here -->",
                     recommendations_section=rec_html,
                     scaling_recommendations=scaling_html,
-                    timestamp=timestamp
+                    timestamp=timestamp,
                 )
-                
+
             elif workload_type == "batch_processing":
                 template = WorkloadReportTemplates.get_batch_processing_html_template()
                 return template.format(
-                    optimal_memory=key_metrics.get('optimal_memory', 'N/A'),
-                    avg_duration=key_metrics.get('avg_duration', 0),
-                    cost_per_execution=key_metrics.get('cost_per_execution', 0),
-                    throughput_improvement=key_metrics.get('throughput_improvement', 0),
-                    cost_efficiency_ratio=key_metrics.get('cost_efficiency_ratio', 1.0),
+                    optimal_memory=key_metrics.get("optimal_memory", "N/A"),
+                    avg_duration=key_metrics.get("avg_duration", 0),
+                    cost_per_execution=key_metrics.get("cost_per_execution", 0),
+                    throughput_improvement=key_metrics.get("throughput_improvement", 0),
+                    cost_efficiency_ratio=key_metrics.get("cost_efficiency_ratio", 1.0),
                     throughput_recommendation="Optimize batch size and concurrency",
                     cost_efficiency_recommendation="Balance memory allocation with processing time",
                     configuration_rows="<!-- Configuration data would be inserted here -->",
                     recommendations_section=rec_html,
                     scaling_recommendations=scaling_html,
-                    timestamp=timestamp
+                    timestamp=timestamp,
                 )
-                
+
             elif workload_type == "event_driven":
                 template = WorkloadReportTemplates.get_event_driven_html_template()
                 return template.format(
-                    optimal_memory=key_metrics.get('optimal_memory', 'N/A'),
-                    avg_processing_time=key_metrics.get('avg_processing_time', 0),
-                    event_success_rate=key_metrics.get('event_success_rate', 0),
-                    memory_utilization=key_metrics.get('memory_utilization', 0),
+                    optimal_memory=key_metrics.get("optimal_memory", "N/A"),
+                    avg_processing_time=key_metrics.get("avg_processing_time", 0),
+                    event_success_rate=key_metrics.get("event_success_rate", 0),
+                    memory_utilization=key_metrics.get("memory_utilization", 0),
                     reliability_recommendation="Ensure consistent event processing",
                     error_handling_recommendation="Implement proper error handling and DLQ",
                     configuration_table="<!-- Configuration table would be inserted here -->",
                     recommendations_section=rec_html,
                     scaling_recommendations=scaling_html,
-                    timestamp=timestamp
+                    timestamp=timestamp,
                 )
             else:
                 # Generic template
                 template = WorkloadReportTemplates.get_generic_html_template()
                 return template.format(
-                    optimal_memory=key_metrics.get('optimal_memory', 'N/A'),
-                    performance_gain=key_metrics.get('performance_gain', 0),
-                    cost_savings=key_metrics.get('cost_savings', 0),
+                    optimal_memory=key_metrics.get("optimal_memory", "N/A"),
+                    performance_gain=key_metrics.get("performance_gain", 0),
+                    cost_savings=key_metrics.get("cost_savings", 0),
                     configuration_table="<!-- Configuration table would be inserted here -->",
                     recommendations_section=rec_html,
-                    timestamp=timestamp
+                    timestamp=timestamp,
                 )
-                
+
         except Exception as e:
             logger.error(f"Error formatting workload report: {e}")
             return f"<html><body><h1>Error generating report: {e}</h1></body></html>"
@@ -868,30 +863,31 @@ class WorkloadReportTemplates:
 
 class ReportFormatter:
     """Utility class for formatting report data."""
-    
+
     @staticmethod
-    def format_configuration_table_rows(configurations: List[Dict[str, Any]], 
-                                      optimal_memory: int) -> str:
+    def format_configuration_table_rows(
+        configurations: List[Dict[str, Any]], optimal_memory: int
+    ) -> str:
         """Format configuration data into HTML table rows."""
         rows_html = ""
-        
+
         for config in configurations:
-            memory_mb = config.get('memory_mb', 0)
+            memory_mb = config.get("memory_mb", 0)
             is_optimal = memory_mb == optimal_memory
-            row_class = 'class="optimal-row"' if is_optimal else ''
-            
+            row_class = 'class="optimal-row"' if is_optimal else ""
+
             # Extract metrics with defaults
-            stats = config.get('statistics', {})
-            duration_stats = stats.get('duration', {})
-            cost_stats = stats.get('cost', {})
-            
-            avg_duration = duration_stats.get('mean', 0)
-            min_duration = duration_stats.get('min', 0)
-            max_duration = duration_stats.get('max', 0)
-            p95_duration = duration_stats.get('p95', 0)
-            avg_cost = cost_stats.get('mean', 0)
-            success_rate = config.get('success_rate', 0)
-            
+            stats = config.get("statistics", {})
+            duration_stats = stats.get("duration", {})
+            cost_stats = stats.get("cost", {})
+
+            avg_duration = duration_stats.get("mean", 0)
+            min_duration = duration_stats.get("min", 0)
+            max_duration = duration_stats.get("max", 0)
+            p95_duration = duration_stats.get("p95", 0)
+            avg_cost = cost_stats.get("mean", 0)
+            success_rate = config.get("success_rate", 0)
+
             rows_html += f"""
             <tr {row_class}>
                 <td>{memory_mb}MB</td>
@@ -903,20 +899,20 @@ class ReportFormatter:
                 <td>{success_rate:.1f}%</td>
             </tr>
             """
-        
+
         return rows_html
 
     @staticmethod
     def format_cost_projection_scenarios(projections: Dict[str, Any]) -> str:
         """Format cost projection scenarios into HTML cards."""
         cards_html = ""
-        
+
         for scenario_name, projection in projections.items():
-            monthly_cost = projection.get('monthly_cost', 0)
-            yearly_cost = projection.get('yearly_cost', 0)
-            invocations_per_day = projection.get('invocations_per_day', 0)
-            pattern_impact = projection.get('pattern_impact', 1.0)
-            
+            monthly_cost = projection.get("monthly_cost", 0)
+            yearly_cost = projection.get("yearly_cost", 0)
+            invocations_per_day = projection.get("invocations_per_day", 0)
+            pattern_impact = projection.get("pattern_impact", 1.0)
+
             cards_html += f"""
             <div class="scenario-card">
                 <h3>{scenario_name.replace('_', ' ').title()}</h3>
@@ -926,5 +922,5 @@ class ReportFormatter:
                 <p><strong>Pattern Impact:</strong> {pattern_impact:.1%} adjustment</p>
             </div>
             """
-        
+
         return cards_html

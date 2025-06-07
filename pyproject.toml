@@ -126,7 +126,7 @@ filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning"
 ]
-timeout = 300
+# timeout = 300
 junit_family = "xunit2"
 
 [tool.coverage.run]
@@ -140,7 +140,6 @@ omit = [
     "aws_lambda_tuner/cli.py",
     "aws_lambda_tuner/cli_module.py"
 ]
-include = ["aws_lambda_tuner/*"]
 concurrency = ["thread", "multiprocessing"]
 
 [tool.coverage.report]

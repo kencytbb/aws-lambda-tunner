@@ -6,9 +6,9 @@ from .continuous_strategy import ContinuousStrategy
 from .scheduled_strategy import ScheduledStrategy
 
 __all__ = [
-    'WorkloadStrategy',
-    'WorkloadType',
-    'OnDemandStrategy',
-    'ContinuousStrategy',
-    'ScheduledStrategy'
+    "WorkloadStrategy",
+    "WorkloadType",
+    "OnDemandStrategy",
+    "ContinuousStrategy",
+    "ScheduledStrategy",
 ]

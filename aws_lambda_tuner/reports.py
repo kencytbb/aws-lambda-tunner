@@ -9,14 +9,14 @@ from .report_service import (
     generate_detailed_report,
     export_to_json,
     export_to_csv,
-    export_to_html
+    export_to_html,
 )
 
 __all__ = [
-    'ReportGenerator',
-    'generate_summary_report',
-    'generate_detailed_report',
-    'export_to_json',
-    'export_to_csv',
-    'export_to_html'
+    "ReportGenerator",
+    "generate_summary_report",
+    "generate_detailed_report",
+    "export_to_json",
+    "export_to_csv",
+    "export_to_html",
 ]
