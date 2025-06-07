@@ -1,3 +1,1 @@
-"""
-Examples package for AWS Lambda Tuner.
-"""
+"""\nExamples for AWS Lambda Tuner.\n"""\n
